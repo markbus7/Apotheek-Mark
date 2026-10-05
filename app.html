@@ -1,0 +1,936 @@
+<title>Apotheek Mark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: één kolom huisapotheek — kop met apotheekkruis, vaste tabbalk, kaarten als apotheeketiketten (mono tekst op een "sticker"). */
+:root {
+  --paper: #ECF0EC;
+  --card: #FBFCFA;
+  --ink: #14201C;
+  --muted: #56655F;
+  --line: #CFD8D2;
+  --accent: #0A6B52;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D4EADF;
+  --sticker: #F3D53A;
+  --sticker-ink: #2A2300;
+  --rx: #B3261E;
+  --rx-soft: #F8DEDA;
+  --warn: #8A5300;
+  --warn-soft: #F7E7C6;
+  --label: #FFFFFF;
+
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --r: 10px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 36px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1513; --card: #161F1C; --ink: #E3EBE7; --muted: #93A49D; --line: #2A3631;
+    --accent: #43C89C; --accent-ink: #03261A; --accent-soft: #15382D;
+    --sticker: #E6C82D; --sticker-ink: #221C00;
+    --rx: #FF8F85; --rx-soft: #3B1714; --warn: #F2B655; --warn-soft: #3A2A0E; --label: #1C2723;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1513; --card: #161F1C; --ink: #E3EBE7; --muted: #93A49D; --line: #2A3631;
+  --accent: #43C89C; --accent-ink: #03261A; --accent-soft: #15382D;
+  --sticker: #E6C82D; --sticker-ink: #221C00;
+  --rx: #FF8F85; --rx-soft: #3B1714; --warn: #F2B655; --warn-soft: #3A2A0E; --label: #1C2723;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  margin: 0;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 0 48px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h2 { font-size: 1.5rem; font-weight: 800; font-stretch: 112%; letter-spacing: -0.01em; }
+h3 { font-size: 1.12rem; font-weight: 700; font-stretch: 100%; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Kop */
+.masthead { display: flex; align-items: center; gap: var(--s4); padding-block: 28px 18px; flex-wrap: wrap; }
+.cross { width: 52px; height: 52px; flex: none; position: relative; }
+.cross::before, .cross::after { content: ""; position: absolute; background: var(--accent); border-radius: 3px; }
+.cross::before { left: 17px; top: 0; width: 18px; height: 52px; }
+.cross::after { top: 17px; left: 0; height: 18px; width: 52px; }
+.masthead h1 { font-size: clamp(2.2rem, 7vw, 3.6rem); font-weight: 900; font-stretch: 125%; letter-spacing: -0.02em; }
+.masthead h1 span { color: var(--accent); }
+.masthead .sub { flex-basis: 100%; max-width: 62ch; color: var(--muted); }
+
+/* Tabs */
+.tabs {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--paper); border-bottom: 1px solid var(--line);
+  display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none;
+  margin-inline: -16px; padding-inline: 16px;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  border: 0; background: none; padding: 12px 14px 10px; cursor: pointer; white-space: nowrap;
+  font-family: var(--f-display); font-weight: 700; font-stretch: 100%; font-size: 0.98rem; color: var(--muted);
+  border-bottom: 3px solid transparent;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab .count { font-family: var(--f-mono); font-size: 0.72rem; font-weight: 500; margin-left: 4px; color: var(--muted); }
+.panel { padding-top: var(--s5); display: grid; gap: var(--s5); }
+
+/* Algemene blokken */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: var(--s4); min-width: 0; }
+.grid { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); align-items: start; }
+.grid2 { display: grid; gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); align-items: start; }
+.row { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; }
+.stack { display: grid; gap: var(--s3); }
+.btn {
+  border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; cursor: pointer;
+  font-weight: 700; font-size: 0.92rem;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.ghost { background: transparent; }
+.btn.danger { color: var(--rx); border-color: var(--rx); background: transparent; }
+.chip {
+  border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.rx { background: var(--rx-soft); color: var(--rx); }
+.pill.exp { background: var(--rx); color: var(--card); }
+.pill.check { background: var(--warn-soft); color: var(--warn); }
+.pill.best { background: var(--sticker); color: var(--sticker-ink); }
+.pill.cat { background: var(--accent-soft); color: var(--accent); }
+.pill.origin { border: 1px solid var(--line); color: var(--muted); }
+
+/* Apotheeketiket */
+.rxlabel {
+  font-family: var(--f-mono); font-size: 0.84rem; line-height: 1.45;
+  background: var(--label); border: 1px dashed var(--line); border-radius: 6px; padding: 10px 12px;
+}
+.rxlabel b { font-weight: 600; }
+
+/* Product kaart */
+.med { display: grid; gap: var(--s3); }
+.med header { display: grid; gap: 6px; }
+.med .name { font-family: var(--f-display); font-weight: 800; font-stretch: 105%; font-size: 1.15rem; line-height: 1.15; }
+.med .active { font-size: 0.92rem; color: var(--muted); }
+.med .meta { display: flex; gap: 6px; flex-wrap: wrap; }
+.med .note { font-size: 0.9rem; }
+.med .note strong { color: var(--accent); }
+.med.is-exp { border-color: var(--rx); }
+
+.toolbar { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; }
+.search { flex: 1 1 220px; min-width: 0; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; }
+
+/* Behandeling */
+.plan { display: grid; gap: var(--s4); }
+.plan-head { display: flex; justify-content: space-between; gap: var(--s3); align-items: flex-start; flex-wrap: wrap; }
+.daybig { font-family: var(--f-display); font-weight: 900; font-stretch: 120%; font-size: 2.6rem; line-height: 1; }
+.daybig small { font-size: 1rem; font-weight: 600; color: var(--muted); font-stretch: 100%; }
+.slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--s2); }
+.slot {
+  border: 2px solid var(--line); background: var(--card); border-radius: var(--r); padding: 14px 12px; cursor: pointer; text-align: left;
+  display: grid; gap: 2px; transition: background .15s, border-color .15s;
+}
+.slot .t { font-weight: 700; }
+.slot .s { font-size: 0.82rem; color: var(--muted); font-family: var(--f-mono); }
+.slot[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.slot[aria-pressed="true"] .s { color: var(--accent-ink); opacity: .85; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; max-width: 360px; }
+.cal .d {
+  aspect-ratio: 1; max-width: 100%; border-radius: 6px; border: 1px solid var(--line); background: var(--paper);
+  display: grid; place-items: center; font-family: var(--f-mono); font-size: 0.72rem; color: var(--muted); position: relative; padding: 0; cursor: pointer;
+}
+.cal .d.full { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.cal .d.half { background: linear-gradient(135deg, var(--accent) 50%, var(--accent-soft) 50%); color: var(--ink); border-color: var(--accent); }
+.cal .d.miss { background: var(--rx-soft); color: var(--rx); border-color: transparent; }
+.cal .d.future { opacity: .45; cursor: default; }
+.cal .d.today { outline: 2px solid var(--ink); outline-offset: 1px; }
+.cal .d.off { visibility: hidden; }
+.cal .d[aria-pressed="true"] { outline: 3px solid var(--sticker); outline-offset: 1px; }
+.legend { display: flex; gap: var(--s3); flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+.bar { height: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; position: relative; }
+.bar > span { display: block; height: 100%; background: var(--accent); }
+.phases { display: grid; grid-template-columns: 28fr 337fr; gap: 3px; font-family: var(--f-mono); font-size: 0.7rem; color: var(--muted); }
+.phases > div { display: grid; gap: 4px; min-width: 0; }
+.phases .seg { height: 10px; border-radius: 3px; background: var(--accent-soft); position: relative; overflow: hidden; }
+.phases .seg > span { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.phases .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stats { display: flex; gap: var(--s5); flex-wrap: wrap; }
+.stat .v { font-family: var(--f-display); font-weight: 800; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.stat .k { font-size: 0.78rem; color: var(--muted); }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 0.82rem; font-weight: 700; }
+.field select, .field input, .field textarea { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
+.setup { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); align-items: end; }
+.confirm { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; font-size: 0.9rem; }
+
+.tips { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.tips li { padding-left: 26px; position: relative; }
+.tips li::before { content: ""; position: absolute; left: 4px; top: 7px; width: 10px; height: 10px; background: var(--accent); clip-path: polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%); }
+
+.notes { display: grid; gap: var(--s2); }
+.notes .n { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s3); align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
+.notes .n .when { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+.notes .n p { min-width: 0; overflow-wrap: anywhere; }
+.linkbtn { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 0.82rem; text-decoration: underline; padding: 0; }
+
+/* Advies */
+.klachten { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.advice { display: grid; gap: var(--s4); }
+.pick { display: grid; gap: var(--s2); padding: var(--s4); border-radius: var(--r); border: 1px solid var(--line); background: var(--card); }
+.pick.first { border: 2px solid var(--accent); }
+.pick .rank { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.pick .pname { font-family: var(--f-display); font-weight: 800; font-size: 1.1rem; }
+.doctor { background: var(--rx-soft); color: var(--ink); border-radius: var(--r); padding: var(--s4); display: grid; gap: 6px; }
+.doctor h3 { color: var(--rx); }
+.doctor ul, .plainlist { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+
+/* Dubbelingen */
+.dup { display: grid; gap: var(--s3); }
+.dup ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.dup li { display: grid; grid-template-columns: 34px 1fr; gap: var(--s3); padding: 10px 0; border-top: 1px solid var(--line); }
+.dup li .pos { font-family: var(--f-display); font-weight: 900; font-size: 1.3rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.dup li.out .pos { color: var(--rx); }
+.dup li .what { min-width: 0; display: grid; gap: 2px; }
+.dup li .what b { font-weight: 700; }
+
+.callout { background: var(--sticker); color: var(--sticker-ink); border-radius: var(--r); padding: var(--s4); display: grid; gap: 6px; }
+.callout h3 { color: var(--sticker-ink); }
+
+.foot { margin-top: var(--s6); padding-top: var(--s4); border-top: 1px solid var(--line); display: grid; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+.sync { font-family: var(--f-mono); font-size: 0.75rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="cross" aria-hidden="true"></div>
+    <h1>Apotheek <span>Mark</span></h1>
+    <p class="sub">Je huisapotheek op één plek: wat je in huis hebt, wat je waarvoor gebruikt, welke dubbel zijn, en een dagelijkse tracker voor de behandeling van voetschimmel en kalknagels.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Onderdelen">
+    <button class="tab" role="tab" id="tab-behandeling" aria-controls="p-behandeling" data-tab="behandeling">Behandeling</button>
+    <button class="tab" role="tab" id="tab-advies" aria-controls="p-advies" data-tab="advies">Wat gebruik ik?</button>
+    <button class="tab" role="tab" id="tab-kastje" aria-controls="p-kastje" data-tab="kastje">Kastje <span class="count num" id="kastCount"></span></button>
+    <button class="tab" role="tab" id="tab-dubbel" aria-controls="p-dubbel" data-tab="dubbel">Dubbelingen</button>
+  </nav>
+
+  <!-- BEHANDELING -->
+  <section class="panel" id="p-behandeling" role="tabpanel" aria-labelledby="tab-behandeling">
+    <div class="grid2" id="plans"></div>
+
+    <div class="grid2">
+      <div class="card stack">
+        <span class="eyebrow">Zo kom je ervan af</span>
+        <h3>Elke dag, naast het smeren</h3>
+        <ul class="tips">
+          <li>Voeten wassen en <b>goed droogdeppen tussen de tenen</b>, daarna pas smeren.</li>
+          <li>Smeer ook 2 cm gezonde huid rondom de plek, en behandel tussen <b>alle</b> tenen.</li>
+          <li>Elke dag schone (katoenen of wollen) sokken; sokken en handdoeken wassen op <b>60 °C</b>.</li>
+          <li>Schoenen om de dag afwisselen zodat ze 24 uur kunnen drogen.</li>
+          <li>Slippers in openbare douches, zwembad en sportschool.</li>
+          <li>Eigen handdoek voor de voeten, en een aparte nagelvijl voor de aangetaste nagel.</li>
+          <li>Stop niet zodra de jeuk weg is: maak de kuur af, anders komt het terug.</li>
+        </ul>
+      </div>
+      <div class="card stack">
+        <span class="eyebrow">Logboek</span>
+        <h3>Notities en voortgang</h3>
+        <p class="small muted">Schrijf op hoe het eruitziet (rood, schilfers, jeuk, kleur nagel). Handig als je later naar de huisarts gaat.</p>
+        <div class="field">
+          <label for="noteText">Nieuwe notitie</label>
+          <textarea id="noteText" rows="2" placeholder="Bijv. jeuk tussen 4e en 5e teen minder, nagel grote teen iets lichter"></textarea>
+        </div>
+        <div class="row">
+          <select id="notePlan" class="btn ghost" aria-label="Notitie over">
+            <option value="voet">Voetschimmel</option>
+            <option value="nagel">Kalknagel</option>
+            <option value="algemeen">Algemeen</option>
+          </select>
+          <button class="btn primary" id="noteAdd">Notitie opslaan</button>
+        </div>
+        <div class="notes" id="notes"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADVIES -->
+  <section class="panel" id="p-advies" role="tabpanel" aria-labelledby="tab-advies" hidden>
+    <div class="stack">
+      <span class="eyebrow">Kies je klacht</span>
+      <div class="klachten" id="klachten"></div>
+    </div>
+    <div class="advice" id="advice"></div>
+  </section>
+
+  <!-- KASTJE -->
+  <section class="panel" id="p-kastje" role="tabpanel" aria-labelledby="tab-kastje" hidden>
+    <div class="toolbar">
+      <input class="search" id="q" type="search" placeholder="Zoek op naam of werkzame stof" aria-label="Zoeken">
+    </div>
+    <div class="klachten" id="catFilter"></div>
+    <div class="grid" id="meds"></div>
+  </section>
+
+  <!-- DUBBELINGEN -->
+  <section class="panel" id="p-dubbel" role="tabpanel" aria-labelledby="tab-dubbel" hidden>
+    <div class="callout">
+      <h3>Kort gezegd</h3>
+      <p>Je hebt 25 producten, maar eigenlijk maar 4 soorten schimmelmiddel. Gebruik er <b>één tegelijk</b>, maak eerst een geopende tube op en combineer middelen uit dezelfde groep niet: dat werkt niet beter en irriteert de huid wel.</p>
+    </div>
+    <div class="grid2" id="dups"></div>
+  </section>
+
+  <footer class="foot">
+    <p>Deze informatie is gebaseerd op de bijsluiters en de NHG-Standaard Dermatomycosen. Het vervangt geen advies van je huisarts of apotheker. Twijfel je, bel dan je apotheek.</p>
+    <p class="sync" id="sync">Opslag: dit apparaat</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------------- Gegevens: je kastje ---------------- */
+const CATS = {
+  voet: "Voetschimmel",
+  nagel: "Nagels",
+  steroid: "Ontsteking (recept)",
+  huid: "Huid & verzorging",
+  maag: "Maag",
+};
+
+const MEDS = [
+  // Terbinafine
+  { id: "mycelvan", name: "Mycelvan crème", active: "Terbinafine 1% (0,888 g/100 g)", cat: "voet", group: "terbinafine", qty: "4 tubes × 30 g", origin: "MX", best: true,
+    use: "Voetschimmel tussen de tenen en op de voetzool.",
+    how: "1× per dag dun aanbrengen. Tussen tenen: 1 week. Zool/zijkant: 2 weken.",
+    note: "<strong>Eerste keus</strong> voor voetschimmel: terbinafine doodt de schimmel en de kuur is het kortst. Je hebt er 4, dus begin hiermee." },
+  { id: "lamisil", name: "Lamisil crème", active: "Terbinafine 1%", cat: "voet", group: "terbinafine", qty: "15 g", origin: "MX",
+    use: "Voetschimmel. Hetzelfde middel als Mycelvan.",
+    how: "1× per dag dun aanbrengen, 1–2 weken.",
+    note: "Zelfde stof als Mycelvan. Klein tubetje: handig voor in je tas of op reis." },
+  { id: "lamisilonce", name: "Lamisil Once 1%", active: "Terbinafine 10 mg/g, filmvormende oplossing", cat: "voet", group: "terbinafine", qty: "4 g", origin: "NL",
+    use: "Voetschimmel in één keer behandelen.",
+    how: "Eenmalig: beide voeten (ook de gezonde) tussen/rond de tenen, zool en zijkant tot 1,5 cm hoog. 1–2 min laten drogen. 24 uur niet wassen. Niet herhalen.",
+    note: "Ideaal als dagelijks smeren niet lukt. Niet combineren met een crèmekuur; het is óf dit, óf een kuur." },
+  { id: "silka", name: "Silka Medic Spray", active: "Terbinafine 1% aerosol", cat: "voet", group: "terbinafine", qty: "2 bussen × 150 ml", origin: "MX", expired: "CAD ENE26: houdbaar tot januari 2026",
+    use: "Voetschimmel op grotere plekken, zool en hiel, zonder te smeren.",
+    how: "1× per dag op droge huid spuiten, 1 week.",
+    note: "Op de bodem staat CAD:ENE26 (caducidad enero 2026). <strong>Over datum</strong>: wegbrengen naar de apotheek of het chemisch afval." },
+
+  // Azolen
+  { id: "conazol", name: "Conazol crème", active: "Ketoconazol 2%", cat: "voet", group: "azool", qty: "2 tubes × 40 g", origin: "MX",
+    use: "Voetschimmel, ook schimmel in liezen of op de romp.",
+    how: "1–2× per dag. Doorgaan tot 1 week nadat de huid er weer gewoon uitziet (meestal 2–4 weken).",
+    note: "Reservemiddel als terbinafine niet genoeg helpt. Zelfde stof als Ketoconazol CF." },
+  { id: "ketocf", name: "Ketoconazol CF crème", active: "Ketoconazol 20 mg/g", cat: "voet", group: "azool", qty: "30 g", origin: "NL",
+    use: "Voetschimmel en andere schimmelinfecties van de huid.",
+    how: "1–2× per dag, tot 1 week na genezing.",
+    note: "Nederlandse bijsluiter erbij. Gelijkwaardig aan Conazol." },
+  { id: "miconazol", name: "Miconazolnitraat Sandoz crème", active: "Miconazolnitraat 20 mg/g", cat: "voet", group: "azool", qty: "30 g", origin: "NL",
+    use: "Schimmel én gist (candida). Werkt ook een beetje tegen bacteriën.",
+    how: "2× per dag, tot 1 week na genezing.",
+    note: "<strong>Beste azool</strong> bij natte, witte, kapotte huid tussen de tenen, waar vaak ook bacteriën meedoen." },
+  { id: "lotrimin", name: "Lotrimin AF crème", active: "Clotrimazol 1%", cat: "voet", group: "azool", qty: "30 g", origin: "US",
+    use: "Voetschimmel, schimmel in de liezen, ringworm.",
+    how: "2× per dag, 4 weken (Amerikaanse bijsluiter).",
+    note: "Zelfde stof als Canesten. Werkt wat trager dan terbinafine." },
+  { id: "canesten", name: "Canesten crème (Bayer)", active: "Clotrimazol 1% (controleer doosje)", cat: "voet", group: "azool", qty: "20 g", origin: "NL", check: "EXP 03-2027",
+    use: "Schimmel- en gistinfecties van de huid.",
+    how: "2–3× per dag, tot 2 weken na genezing.",
+    note: "Gelijkwaardig aan Lotrimin AF. Houdbaar tot maart 2027." },
+  { id: "lotriminuno", name: "Lotrimin-Uno crème", active: "Bifonazol 1%", cat: "voet", group: "azool", qty: "20 g", origin: "MX",
+    use: "Voetschimmel.",
+    how: "1× per dag ('s avonds), 3 weken.",
+    note: "Voordeel boven de andere azolen: maar 1× per dag smeren." },
+
+  // Undecyleenzuur e.d.
+  { id: "tiny", name: "Tiny crème", active: "Undecyleenzuur, zinkundecylenaat, triclosan", cat: "voet", group: "undec", qty: "28 g", origin: "MX",
+    use: "Lichte voetschimmel en voetgeur.",
+    how: "2× per dag op schone, droge voeten.",
+    note: "Ouder, zwakker middel. Vooral nuttig tegen geur of als nazorg." },
+  { id: "micotex", name: "Micotex crème", active: "Undecyleenzuur 4%, aluminium-zirkoniumzout 0,5%, zinkundecylenaat 10%", cat: "voet", group: "undec", qty: "40 g", origin: "MX",
+    use: "Zweetvoeten met lichte schimmel; voorkomen dat het terugkomt.",
+    how: "1–2× per dag op schone, droge voeten.",
+    note: "Bevat een anti-transpirant. <strong>Handig na de kuur</strong> om terugkeer te voorkomen als je snel zweetvoeten hebt." },
+  { id: "funginail", name: "Fungi-Nail Anti-Fungal Liquid", active: "Tolnaftaat 1% (oudere versies: undecyleenzuur 25%; zie etiket)", cat: "nagel", group: "undec", qty: "2 flesjes × 30 ml", origin: "US",
+    use: "Schimmel op de huid rond en onder de nagelrand.",
+    how: "2× per dag met het kwastje op de huid rond de nagel, 4 weken.",
+    note: "Behandelt de <em>huid</em> rond de nagel, niet de nagel zelf. Eén flesje is nog verzegeld." },
+
+  // Nagels
+  { id: "nailner", name: "Nailner 2-in-1 kalknagelpen", active: "Medisch hulpmiddel op zuurbasis (verlaagt de pH in de nagel)", cat: "nagel", group: "nagel", qty: "1 pen in gebruik + voordeelverpakking 2 × 4 ml", origin: "NL", best: true,
+    use: "Kalknagel (schimmelnagel): verkleurde, verdikte of brokkelige nagel.",
+    how: "Eerste 4 weken 2× per dag ('s ochtends en 's avonds), daarna 1× per dag tot de nagel helemaal is uitgegroeid (teennagel 8–12 maanden).",
+    note: "<strong>Eerste keus</strong> voor je nagels. Smeer ook de rand en onderkant van de nagel. Gebruik de pennen één voor één; 2 × 4 ml is samen ongeveer 800 behandelingen." },
+
+  // Corticosteroïden
+  { id: "triace", name: "Triamcinolonacetonide 0,1% zalf (ACE)", active: "Triamcinolonacetonide 1 mg/g, cetomacrogolzalf", cat: "steroid", group: "steroid", qty: "30 g", origin: "NL", rx: true, check: "Na openen 3 maanden houdbaar",
+    use: "Eczeem en ontstoken, jeukende huid. Alleen op voorschrift.",
+    how: "Zoals de arts voorschreef, meestal 1× per dag dun, kort.",
+    note: "<strong>Niet op schimmel smeren</strong>: een corticosteroïd laat schimmel juist groeien. Zalf is vetter: voor droge, dikke huid. Geopend en ouder dan 3 maanden? Weggooien." },
+  { id: "trimylan", name: "Triamcinolonacetonide Mylan crème", active: "Triamcinolonacetonide 1 mg/g, o/w crème (FNA)", cat: "steroid", group: "steroid", qty: "30 g", origin: "NL", rx: true,
+    use: "Eczeem en ontstoken, jeukende huid. Alleen op voorschrift.",
+    how: "Zoals de arts voorschreef, meestal 1× per dag dun, kort.",
+    note: "Zelfde stof en sterkte als de ACE-zalf. Crème trekt beter in: fijner op vochtige plekken en huidplooien. Niet op schimmel." },
+
+  // Huid & verzorging
+  { id: "lidocaine", name: "Lidocaïne 5% crème", active: "Lidocaïne 5%", cat: "huid", group: "overig", qty: "35 g", origin: "MX",
+    use: "Plaatselijke verdoving bij pijnlijke of branderige huid.",
+    how: "Dun op een klein, onbeschadigd huidgebied; enkele keren per dag.",
+    note: "Niet op open wondjes of grote oppervlakken. Behandelt geen schimmel, dempt alleen het branden." },
+  { id: "balea", name: "Balea Urea voetcrème", active: "Ureum 10%", cat: "huid", group: "vocht", qty: "tube", origin: "DE",
+    use: "Zeer droge voeten, eelt en kloven in de hielen.",
+    how: "1–2× per dag op de hielen en zool.",
+    note: "Ureum verweekt eelt en dikke nagels: smeer het ook op de kalknagel, dan dringt Nailner beter door. Niet op kapotte huid tussen de tenen (prikt)." },
+  { id: "vaseline", name: "Vaseline-cetomacrogolcrème", active: "Vaseline in cetomacrogolcrème", cat: "huid", group: "vocht", qty: "100 g", origin: "NL",
+    use: "Droge huid, basisverzorging bij eczeem.",
+    how: "1–3× per dag, zo vaak als nodig.",
+    note: "Neutraal en goedkoop. Prima naast een corticosteroïd (eerst de zalf, 15 min later de crème)." },
+  { id: "eucerin", name: "Eucerin Eczema Relief", active: "Colloïdale havermout, ceramide-3", cat: "huid", group: "vocht", qty: "226 g", origin: "US",
+    use: "Droge, jeukende huid die snel eczeem krijgt.",
+    how: "Dagelijks na het douchen.",
+    note: "Rijker dan de vaselinecrème en geparfumeerd-vrij. Voor gezicht en lichaam." },
+  { id: "familyguard", name: "Family Guard desinfectiespray", active: "Desinfectant voor ruimtes en oppervlakken", cat: "huid", group: "overig", qty: "55 ml", origin: "AR",
+    use: "Oppervlakken desinfecteren: douchevloer, badmat, binnenkant schoenen.",
+    how: "Spuiten, laten drogen. Niet op de huid.",
+    note: "Niet voor op je voeten. Voor schoenen werkt drogen en afwisselen het best." },
+
+  // Maag
+  { id: "pantoprazol", name: "Pantoprazol 20 mg", active: "Pantoprazol (maagsapresistent)", cat: "maag", group: "maag", qty: "14 tabletten", origin: "NL", rx: true,
+    use: "Voorkomen van maagklachten. Op recept.",
+    how: "1× per dag 1 tablet, heel doorslikken, liefst ± 1 uur voor het ontbijt.",
+    note: "Remt de aanmaak van maagzuur, werkt pas na 1–3 dagen goed. Herhalen via de website of app van je apotheek." },
+  { id: "gaviscon", name: "Gaviscon 250 pepermunt", active: "Natriumalginaat 250 mg, natriumwaterstofcarbonaat 133,5 mg, calciumcarbonaat 80 mg", cat: "maag", group: "antacida", qty: "48 kauwtabletten", origin: "NL", best: true,
+    use: "Brandend maagzuur en zure oprispingen (reflux), vooral na het eten of 's nachts.",
+    how: "2–4 tabletten goed kauwen na de maaltijd en voor het slapen, max. 4× per dag.",
+    note: "<strong>Beste bij reflux</strong>: vormt een laagje bovenop de maaginhoud zodat zuur niet omhoog komt." },
+  { id: "rennie", name: "Rennie sinaasappel", active: "Calciumcarbonaat 680 mg, magnesiumcarbonaat 80 mg", cat: "maag", group: "antacida", qty: "kauwtabletten", origin: "NL",
+    use: "Af en toe brandend maagzuur.",
+    how: "1–2 tabletten kauwen of laten smelten; houd je aan het maximum in de bijsluiter.",
+    note: "Werkt binnen minuten. Niet samen met Tums nemen (beide calciumcarbonaat)." },
+  { id: "tums", name: "Tums Chewy Delights Ultra", active: "Calciumcarbonaat (Ultra Strength)", cat: "maag", group: "antacida", qty: "zakje", origin: "US",
+    use: "Af en toe brandend maagzuur.",
+    how: "1–2 snoepjes kauwen; houd je aan het maximum op de verpakking.",
+    note: "Zelfde werking als Rennie, alleen hoger gedoseerd. Kies één van de twee." },
+];
+
+/* ---------------- Dubbelingen ---------------- */
+const DUPS = [
+  { title: "Terbinafine", sub: "Schimmeldodend, kortste kuur. Je beste wapen tegen voetschimmel.",
+    order: [
+      ["mycelvan", "Begin hiermee. Eén tube tegelijk open; 4 tubes is genoeg voor maanden."],
+      ["lamisilonce", "Bewaren voor als dagelijks smeren niet lukt (vakantie, druk). Eén keer is één hele behandeling."],
+      ["lamisil", "Gelijk aan Mycelvan. Pak dit als de Mycelvan op is of voor onderweg."],
+      ["silka", "Over datum (jan 2026). Inleveren bij de apotheek.", true],
+    ] },
+  { title: "Azolen", sub: "Remmen de schimmel, langere kuur. Reserve als terbinafine niet genoeg helpt.",
+    order: [
+      ["miconazol", "Bij natte, witte, kapotte huid tussen de tenen (helpt ook tegen gist en bacteriën)."],
+      ["lotriminuno", "Als je liever 1× per dag smeert."],
+      ["ketocf", "Ketoconazol: drie tubes van hetzelfde (met Conazol). Maak eerst de geopende op."],
+      ["conazol", "Zelfde als Ketoconazol CF."],
+      ["canesten", "Clotrimazol, houdbaar tot 03-2027."],
+      ["lotrimin", "Zelfde als Canesten. Bewaren of weggeven."],
+    ] },
+  { title: "Undecyleenzuur en tolnaftaat", sub: "Oudere, mildere middelen. Vooral voor nazorg, zweet en geur.",
+    order: [
+      ["micotex", "Na de kuur 's ochtends, als je snel zweetvoeten hebt."],
+      ["funginail", "Alleen voor de huid rond de nagel. Eén flesje is nog dicht."],
+      ["tiny", "Tegen voetgeur. Overbodig naast Micotex."],
+    ] },
+  { title: "Triamcinolon (recept)", sub: "Twee keer dezelfde corticosteroïd, zelfde sterkte. Niet voor schimmel.",
+    order: [
+      ["trimylan", "Crème: trekt goed in, fijner overdag en op vochtige plekken."],
+      ["triace", "Zalf: alleen als hij minder dan 3 maanden geleden is geopend. Anders weggooien.", true],
+    ] },
+  { title: "Maagzuurremmers", sub: "Rennie, Tums en Gaviscon bevatten alle drie calciumcarbonaat. Stapel ze niet.",
+    order: [
+      ["pantoprazol", "Dagelijks volgens recept. Heb je naast pantoprazol vaker dan 2× per week Rennie of Gaviscon nodig? Overleg met je huisarts."],
+      ["gaviscon", "Bij reflux, na het eten en voor het slapen."],
+      ["rennie", "Snel iets bij af en toe zuurbranden."],
+      ["tums", "Zelfde als Rennie. Kies er één, niet allebei op een dag."],
+    ] },
+  { title: "Huidcrèmes", sub: "Verzorging, geen medicijn. Je kunt ze naast elkaar gebruiken op verschillende plekken.",
+    order: [
+      ["balea", "Voeten: hielen, eelt en dikke nagels."],
+      ["vaseline", "Lichaam: basiscrème voor droge huid."],
+      ["eucerin", "Bij eczeemgevoelige, jeukende huid."],
+    ] },
+];
+
+/* ---------------- Advies per klacht ---------------- */
+const KLACHTEN = [
+  { id: "tenen", label: "Jeuk en schilfers tussen de tenen",
+    picks: [["mycelvan", "1× per dag, 1 week. Ook tussen de tenen die er gezond uitzien."], ["lamisilonce", "Eén keer smeren als dagelijks smeren niet lukt."], ["lotriminuno", "Als terbinafine na 2 weken niet helpt: 1× per dag, 3 weken."]],
+    doc: ["Na 2–4 weken goed smeren geen verbetering", "Het komt steeds terug: vraag de huisarts om een schimmelkweek, het kan ook eczeem zijn"] },
+  { id: "zool", label: "Droge schilfers op voetzool of zijkant",
+    picks: [["mycelvan", "1× per dag, 2 weken, op de hele zool en zijkant."], ["balea", "Daarnaast op de hielen tegen eelt (niet op kapotte huid)."], ["ketocf", "Reserve: 2× per dag tot 1 week na genezing."]],
+    doc: ["Dikke, schilferende 'mocassin'-voet die niet reageert op crème: soms zijn tabletten nodig"] },
+  { id: "nat", label: "Witte, natte, kapotte huid tussen de tenen",
+    picks: [["miconazol", "2× per dag; helpt ook tegen gist en bacteriën."], ["mycelvan", "Als het na een paar dagen droger is, kan terbinafine ook."]],
+    doc: ["Rode, warme, gezwollen voet of streep omhoog, koorts of pus: dat is een bacteriële infectie. Dezelfde dag naar de huisarts"] },
+  { id: "kalk", label: "Kalknagel: verkleurd, dik of brokkelig",
+    picks: [["nailner", "4 weken 2× per dag, daarna 1× per dag tot de nagel is uitgegroeid (8–12 maanden). Start in de tracker."], ["balea", "Ureum op de nagel maakt hem zachter, dan dringt Nailner beter in."], ["mycelvan", "Behandel ook de voetschimmel ernaast, anders blijft de nagel besmet raken."]],
+    doc: ["Meer dan de helft van de nagel of meerdere nagels aangetast", "Het nagelbed (de basis) doet mee, of de nagel doet pijn", "Je hebt diabetes of slechte doorbloeding", "Na 6 maanden geen gezonde nagel die aangroeit: tabletten (terbinafine) van de huisarts werken veel beter dan iets op de nagel"] },
+  { id: "rand", label: "Rode, jeukende huid rond de nagel",
+    picks: [["funginail", "2× per dag op de huid rond de nagel."], ["mycelvan", "Alternatief: 1× per dag terbinafinecrème om de nagel."]],
+    doc: ["Kloppende pijn, zwelling of pus naast de nagel (ontstoken nagelriem)"] },
+  { id: "zweet", label: "Zweetvoeten en voetgeur",
+    picks: [["micotex", "'s Ochtends op droge voeten; ook als nazorg na een kuur."], ["tiny", "Tegen geur."]],
+    doc: ["Zweet zo erg dat het je dagelijks leven beperkt"] },
+  { id: "hiel", label: "Droge hielen, eelt en kloven",
+    picks: [["balea", "1–2× per dag; ureum verweekt eelt."], ["vaseline", "'s Avonds dik smeren, sokken aan."]],
+    doc: ["Diepe, bloedende kloven die niet genezen, zeker bij diabetes"] },
+  { id: "eczeem", label: "Droge, jeukende huid of eczeem (geen schimmel)",
+    picks: [["vaseline", "Dagelijks als basis."], ["eucerin", "Rijker alternatief bij eczeemgevoelige huid."], ["trimylan", "Alleen bij een opvlamming en zoals voorgeschreven. Nooit op schimmel."]],
+    doc: ["Je weet niet zeker of het eczeem of schimmel is: dan eerst geen corticosteroïd, laat het beoordelen"] },
+  { id: "pijn", label: "Pijnlijke of branderige huid",
+    picks: [["lidocaine", "Dun op een klein, gaaf stukje huid voor tijdelijke verlichting."]],
+    doc: ["Pijn met roodheid, warmte en zwelling (infectie)"] },
+  { id: "zuur", label: "Af en toe brandend maagzuur",
+    picks: [["rennie", "1–2 tabletten, werkt binnen minuten."], ["tums", "Of dit, niet allebei."]],
+    doc: ["Klachten vaker dan 2× per week ondanks pantoprazol", "Moeite met slikken, braken, zwarte ontlasting of ongewild afvallen: direct contact met de huisarts"] },
+  { id: "reflux", label: "Zure oprispingen, vooral na eten of 's nachts",
+    picks: [["gaviscon", "2–4 kauwtabletten na de maaltijd en voor het slapen."], ["pantoprazol", "Dagelijks volgens recept, ± 1 uur voor het ontbijt."]],
+    doc: ["Klachten blijven ondanks dagelijks pantoprazol"] },
+  { id: "schoen", label: "Schoenen, sokken en douche schimmelvrij",
+    picks: [["familyguard", "Douchevloer en binnenkant schoenen, niet op de huid."], ["micotex", "Voeten droog houden na de kuur."]],
+    doc: [] },
+];
+
+/* ---------------- Behandelplannen ---------------- */
+const FOOT_OPTIONS = {
+  mycelvan:    { label: "Mycelvan (terbinafine) crème", perDay: 1, days: 14, how: "1× per dag dun, ook 2 cm rondom. Tussen de tenen is 1 week vaak genoeg; zool/zijkant 2 weken." },
+  lamisil:     { label: "Lamisil crème (terbinafine)",  perDay: 1, days: 14, how: "1× per dag dun, 1–2 weken." },
+  lotriminuno: { label: "Lotrimin-Uno (bifonazol)",     perDay: 1, days: 21, how: "1× per dag 's avonds, 3 weken." },
+  ketocf:      { label: "Ketoconazol (CF of Conazol)",  perDay: 2, days: 28, how: "2× per dag, door tot 1 week nadat de huid normaal is." },
+  miconazol:   { label: "Miconazol Sandoz",             perDay: 2, days: 28, how: "2× per dag, door tot 1 week nadat de huid normaal is." },
+  lamisilonce: { label: "Lamisil Once (eenmalig)",      perDay: 1, days: 1,  how: "Eén keer beide voeten, 24 uur niet wassen. Daarna alleen nog de hygiëne-tips volgen." },
+};
+const NAIL = { label: "Nailner 2-in-1 kalknagelpen", phase1: 28, days: 365 };
+
+/* ---------------- Hulpfuncties ---------------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const diffDays = (a, b) => Math.round((parseKey(keyOf(b)) - parseKey(keyOf(a))) / 86400000);
+const todayKey = () => keyOf(new Date());
+const fmtShort = k => parseKey(k).toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+const medById = id => MEDS.find(m => m.id === id);
+const ORIGIN = { NL: "NL", MX: "Mexico", US: "VS", DE: "Duitsland", AR: "Argentinië" };
+
+/* ---------------- Opslag: artifact-db, anders dit apparaat ---------------- */
+const LS = "apotheek-mark:";
+const lsGet = k => { try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) {} };
+
+const S = {
+  voet: lsGet("voet"),
+  nagel: lsGet("nagel"),
+  notities: lsGet("notities") || { items: [] },
+};
+let db = null;
+const queues = {};
+
+function save(name) {
+  lsSet(name, S[name]);
+  if (!db) return;
+  const body = S[name] ? JSON.parse(JSON.stringify(S[name])) : null;
+  const ref = db.doc("behandeling/" + name);
+  queues[name] = (queues[name] || Promise.resolve())
+    .then(() => body ? ref.set(body) : ref.delete())
+    .then(() => setSync("Opgeslagen in je artifact"))
+    .catch(e => setSync(e && e.code === "invalid_argument" ? "Alleen-lezen: je kunt hier niets wijzigen" : "Opslaan mislukt, wordt op dit apparaat bewaard"));
+}
+function setSync(t) { $("#sync").textContent = "Opslag: " + t; }
+
+async function connectDb() {
+  try {
+    if (!window.claude || typeof window.claude.use !== "function") return;
+    db = await window.claude.use("db");
+  } catch (e) { db = null; }
+  if (!db) return;
+  setSync("je artifact (wordt geladen)");
+  for (const name of ["voet", "nagel", "notities"]) {
+    let first = true;
+    db.doc("behandeling/" + name).onSnapshot(snap => {
+      if (snap.exists) {
+        S[name] = JSON.parse(JSON.stringify(snap.data()));
+        lsSet(name, S[name]);
+      } else if (first && S[name] && (name !== "notities" || S[name].items.length)) {
+        save(name); // eerdere gegevens van dit apparaat meenemen
+      } else if (!snap.metadata.fromCache) {
+        S[name] = name === "notities" ? { items: [] } : null;
+      }
+      first = false;
+      setSync("Opgeslagen in je artifact");
+      renderPlans(); renderNotes();
+    }, () => setSync("dit apparaat (artifact-opslag niet bereikbaar)"));
+  }
+}
+
+/* ---------------- Tabs ---------------- */
+const TABS = ["behandeling", "advies", "kastje", "dubbel"];
+function showTab(t) {
+  if (!TABS.includes(t)) t = "behandeling";
+  for (const x of TABS) {
+    $("#tab-" + x).setAttribute("aria-selected", String(x === t));
+    $("#tab-" + x).tabIndex = x === t ? 0 : -1;
+    $("#p-" + x).hidden = x !== t;
+  }
+  try { localStorage.setItem(LS + "tab", t); } catch (e) {}
+}
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+$(".tabs").addEventListener("keydown", e => {
+  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  const cur = TABS.findIndex(x => $("#tab-" + x).getAttribute("aria-selected") === "true");
+  const nxt = TABS[(cur + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+  showTab(nxt); $("#tab-" + nxt).focus();
+});
+
+/* ---------------- Kastje ---------------- */
+let catSel = "alle";
+function pills(m) {
+  const out = [`<span class="pill cat">${esc(CATS[m.cat])}</span>`];
+  if (m.best) out.push(`<span class="pill best">Eerste keus</span>`);
+  if (m.rx) out.push(`<span class="pill rx">Recept</span>`);
+  if (m.expired) out.push(`<span class="pill exp">Over datum</span>`);
+  else if (m.check) out.push(`<span class="pill check">${esc(m.check)}</span>`);
+  out.push(`<span class="pill origin">${esc(ORIGIN[m.origin] || m.origin)}</span>`);
+  return out.join("");
+}
+function medCard(m) {
+  return `<article class="card med${m.expired ? " is-exp" : ""}">
+    <header>
+      <div class="meta">${pills(m)}</div>
+      <div class="name">${esc(m.name)}</div>
+      <div class="active">${esc(m.active)} · <span class="num">${esc(m.qty)}</span></div>
+    </header>
+    <p>${esc(m.use)}</p>
+    <div class="rxlabel"><b>GEBRUIK</b><br>${esc(m.how)}</div>
+    <p class="note">${m.note}</p>
+  </article>`;
+}
+function renderCats() {
+  const counts = { alle: MEDS.length };
+  MEDS.forEach(m => counts[m.cat] = (counts[m.cat] || 0) + 1);
+  $("#catFilter").innerHTML = [["alle", "Alles"], ...Object.entries(CATS)]
+    .map(([k, v]) => `<button class="chip" data-cat="${k}" aria-pressed="${k === catSel}">${esc(v)} <span class="num muted">${counts[k] || 0}</span></button>`).join("");
+}
+function renderMeds() {
+  const q = $("#q").value.trim().toLowerCase();
+  const list = MEDS.filter(m => (catSel === "alle" || m.cat === catSel) &&
+    (!q || (m.name + " " + m.active + " " + m.use).toLowerCase().includes(q)));
+  $("#meds").innerHTML = list.length ? list.map(medCard).join("")
+    : `<p class="muted">Niets gevonden voor “${esc(q)}”. Probeer een werkzame stof, bijvoorbeeld terbinafine.</p>`;
+}
+$("#catFilter").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  catSel = b.dataset.cat; renderCats(); renderMeds();
+});
+$("#q").addEventListener("input", renderMeds);
+$("#kastCount").textContent = MEDS.length;
+
+/* ---------------- Dubbelingen ---------------- */
+function renderDups() {
+  $("#dups").innerHTML = DUPS.map(g => `<div class="card dup">
+    <div class="stack" style="gap:4px"><h3>${esc(g.title)}</h3><p class="small muted">${esc(g.sub)}</p></div>
+    <ol>${g.order.map(([id, why, out], i) => {
+      const m = medById(id);
+      return `<li class="${out ? "out" : ""}"><span class="pos">${out ? "×" : i + 1}</span>
+        <div class="what"><b>${esc(m.name)}</b><span class="small muted">${esc(m.active)}</span><span class="small">${esc(why)}</span></div></li>`;
+    }).join("")}</ol>
+  </div>`).join("");
+}
+
+/* ---------------- Advies ---------------- */
+let klachtSel = KLACHTEN[0].id;
+function renderKlachten() {
+  $("#klachten").innerHTML = KLACHTEN.map(k => `<button class="chip" data-k="${k.id}" aria-pressed="${k.id === klachtSel}">${esc(k.label)}</button>`).join("");
+}
+function renderAdvice() {
+  const k = KLACHTEN.find(x => x.id === klachtSel);
+  const ranks = ["Eerste keus", "Daarnaast of als alternatief", "Reserve"];
+  $("#advice").innerHTML = `<h2>${esc(k.label)}</h2>
+    <div class="grid">${k.picks.map(([id, why], i) => {
+      const m = medById(id);
+      return `<div class="pick${i === 0 ? " first" : ""}">
+        <span class="rank">${ranks[Math.min(i, 2)]}</span>
+        <span class="pname">${esc(m.name)}</span>
+        <span class="small muted">${esc(m.active)}</span>
+        <div class="rxlabel">${esc(why)}</div>
+        <div class="meta row">${m.expired ? '<span class="pill exp">Over datum</span>' : ""}${m.rx ? '<span class="pill rx">Recept</span>' : ""}</div>
+      </div>`;
+    }).join("")}</div>
+    ${k.doc.length ? `<div class="doctor"><h3>Naar de huisarts als…</h3><ul>${k.doc.map(d => `<li>${esc(d)}</li>`).join("")}</ul></div>` : ""}`;
+}
+$("#klachten").addEventListener("click", e => {
+  const b = e.target.closest("[data-k]"); if (!b) return;
+  klachtSel = b.dataset.k; renderKlachten(); renderAdvice();
+});
+
+/* ---------------- Behandeling: tracker ---------------- */
+let confirmReset = null;
+let calPick = {}; // per plan: geselecteerde dag om achteraf aan te passen
+
+function planSpec(name, plan) {
+  if (name === "voet") {
+    const o = FOOT_OPTIONS[plan.product] || FOOT_OPTIONS.mycelvan;
+    return { label: o.label, total: plan.days || o.days, perDayAt: () => o.perDay, how: o.how };
+  }
+  return { label: NAIL.label, total: NAIL.days, perDayAt: i => i < NAIL.phase1 ? 2 : 1,
+    how: "Eerste 4 weken 2× per dag, daarna 1× per dag. Vijl de bovenkant van de nagel 1× per week licht op met een eigen vijl." };
+}
+function slotNames(n) { return n === 2 ? ["Ochtend", "Avond"] : ["Vandaag"]; }
+
+function stats(name, plan) {
+  const sp = planSpec(name, plan);
+  const start = parseKey(plan.start);
+  const idxToday = diffDays(start, new Date());
+  let expected = 0, done = 0, streak = 0, streakOpen = true;
+  const last = Math.min(idxToday, sp.total - 1);
+  for (let i = last; i >= 0; i--) {
+    const k = keyOf(addDays(start, i));
+    const need = sp.perDayAt(i);
+    const got = (plan.log[k] || []).filter(Boolean).length;
+    expected += need; done += Math.min(got, need);
+    if (streakOpen) {
+      if (got >= need) streak++;
+      else if (i !== idxToday) streakOpen = false;
+    }
+  }
+  return { sp, idxToday, expected, done, pct: expected ? Math.round(done / expected * 100) : 0, streak };
+}
+
+function calHTML(name, plan, from, count) {
+  const sp = planSpec(name, plan);
+  const start = parseKey(plan.start);
+  const today = todayKey();
+  const firstDate = addDays(start, from);
+  const lead = (firstDate.getDay() + 6) % 7; // maandag eerst
+  let h = ["ma","di","wo","do","vr","za","zo"].map(d => `<span class="eyebrow" style="text-align:center;font-size:.62rem">${d}</span>`).join("");
+  for (let i = 0; i < lead; i++) h += `<span class="d off"></span>`;
+  for (let i = from; i < from + count; i++) {
+    const d = addDays(start, i), k = keyOf(d);
+    const need = sp.perDayAt(i);
+    const got = (plan.log[k] || []).filter(Boolean).length;
+    const fut = k > today;
+    let cls = "d";
+    if (fut) cls += " future";
+    else if (got >= need) cls += " full";
+    else if (got > 0) cls += " half";
+    else if (k < today) cls += " miss";
+    if (k === today) cls += " today";
+    const sel = calPick[name] === k ? ' aria-pressed="true"' : "";
+    h += `<button class="${cls}" data-day="${k}" data-plan="${name}" ${fut ? "disabled" : ""}${sel} aria-label="${fmtShort(k)}: ${got} van ${need}">${d.getDate()}</button>`;
+  }
+  return `<div class="cal">${h}</div>`;
+}
+
+function slotsHTML(name, plan, k, idx) {
+  const sp = planSpec(name, plan);
+  const need = sp.perDayAt(idx);
+  const got = plan.log[k] || [];
+  const names = slotNames(need);
+  return `<div class="slots">${names.map((n, i) => `<button class="slot" data-plan="${name}" data-day="${k}" data-slot="${i}" aria-pressed="${!!got[i]}">
+      <span class="t">${got[i] ? "✓ " : ""}${n}</span><span class="s">${got[i] ? "gedaan" : "nog doen"}</span></button>`).join("")}</div>`;
+}
+
+function setupHTML(name) {
+  const t = todayKey();
+  if (name === "voet") {
+    return `<div class="card plan">
+      <div class="plan-head"><div class="stack" style="gap:4px"><span class="eyebrow">Voetschimmel</span><h2>Nog geen kuur gestart</h2></div></div>
+      <p class="muted">Kies een middel en startdatum. Advies: Mycelvan, 1× per dag, 14 dagen. Daarna vink je elke dag af en zie je hoe ver je bent.</p>
+      <div class="setup">
+        <div class="field"><label for="voetProd">Middel</label>
+          <select id="voetProd">${Object.entries(FOOT_OPTIONS).map(([k, o]) => `<option value="${k}">${esc(o.label)} · ${o.perDay}× p/d · ${o.days} d</option>`).join("")}</select></div>
+        <div class="field"><label for="voetStart">Startdatum</label><input id="voetStart" type="date" value="${t}"></div>
+        <button class="btn primary" data-start="voet">Start kuur</button>
+      </div>
+    </div>`;
+  }
+  return `<div class="card plan">
+    <div class="plan-head"><div class="stack" style="gap:4px"><span class="eyebrow">Kalknagel</span><h2>Nog niet gestart</h2></div></div>
+    <p class="muted">Nailner: 4 weken 2× per dag, daarna 1× per dag tot de nagel helemaal is uitgegroeid (± 12 maanden voor een teennagel).</p>
+    <div class="setup">
+      <div class="field"><label for="nagelStart">Startdatum</label><input id="nagelStart" type="date" value="${t}"></div>
+      <button class="btn primary" data-start="nagel">Start behandeling</button>
+    </div>
+  </div>`;
+}
+
+function planHTML(name) {
+  const plan = S[name];
+  if (!plan) return setupHTML(name);
+  const st = stats(name, plan);
+  const { sp, idxToday } = st;
+  const day = idxToday + 1;
+  const done = idxToday >= sp.total;
+  const notStarted = idxToday < 0;
+  const editKey = calPick[name] || todayKey();
+  const editIdx = diffDays(parseKey(plan.start), parseKey(editKey));
+  const isToday = editKey === todayKey();
+
+  let headline;
+  if (notStarted) headline = `<div class="daybig num">Start ${fmtShort(plan.start)}</div>`;
+  else if (done) headline = `<div class="daybig">Klaar</div>`;
+  else if (name === "nagel") {
+    const w = Math.floor(idxToday / 7) + 1;
+    headline = `<div class="daybig num">Week ${w} <small>van ± 52</small></div>`;
+  } else headline = `<div class="daybig num">Dag ${day} <small>van ${sp.total}</small></div>`;
+
+  let progress = "";
+  if (name === "nagel") {
+    const p1 = Math.min(1, Math.max(0, (idxToday + 1) / NAIL.phase1));
+    const p2 = Math.min(1, Math.max(0, (idxToday + 1 - NAIL.phase1) / (NAIL.days - NAIL.phase1)));
+    progress = `<div class="phases" aria-label="Fases">
+      <div><div class="seg"><span style="width:${p1 * 100}%"></span></div><span class="lbl">4 wk · 2×/dag</span></div>
+      <div><div class="seg"><span style="width:${p2 * 100}%"></span></div><span class="lbl">Fase 2 · 1× per dag tot de nagel is uitgegroeid</span></div>
+    </div>`;
+  } else {
+    const p = Math.min(1, Math.max(0, (idxToday + 1) / sp.total));
+    progress = `<div class="bar" aria-label="Voortgang kuur"><span style="width:${p * 100}%"></span></div>`;
+  }
+
+  let cal;
+  if (name === "voet") cal = calHTML(name, plan, 0, sp.total);
+  else {
+    const upto = Math.min(Math.max(idxToday, 6), sp.total - 1);
+    const from = Math.max(0, upto - 27);
+    cal = calHTML(name, plan, from, upto - from + 1);
+  }
+
+  const phaseNote = name === "nagel" && !done && !notStarted
+    ? (idxToday < NAIL.phase1 ? `Fase 1: nog ${NAIL.phase1 - idxToday} dagen 2× per dag.` : "Fase 2: 1× per dag. Volhouden tot de gezonde nagel er helemaal is.")
+    : "";
+  const footDoneNote = name === "voet" && done
+    ? `<p class="small">Kuur afgerond. Is de huid nog niet helemaal rustig? Ga door tot 1 week na genezing of kijk bij <i>Wat gebruik ik?</i> voor het volgende middel. Daarna: Micotex als nazorg.</p>` : "";
+
+  const resetUI = confirmReset === name
+    ? `<span class="confirm">Alle vinkjes van deze ${name === "voet" ? "kuur" : "behandeling"} wissen? <button class="btn danger" data-reset-yes="${name}">Ja, wissen</button><button class="btn ghost" data-reset-no>Nee</button></span>`
+    : `<button class="linkbtn" data-reset="${name}">${done ? "Nieuwe kuur starten" : "Stoppen of opnieuw beginnen"}</button>`;
+
+  return `<div class="card plan">
+    <div class="plan-head">
+      <div class="stack" style="gap:6px">
+        <span class="eyebrow">${name === "voet" ? "Voetschimmel" : "Kalknagel"} · ${esc(sp.label)}</span>
+        ${headline}
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v">${st.pct}%</div><div class="k">trouw gesmeerd</div></div>
+        <div class="stat"><div class="v">${st.streak}</div><div class="k">dagen op rij</div></div>
+      </div>
+    </div>
+    ${progress}
+    <div class="rxlabel">${esc(sp.how)}${phaseNote ? `<br><b>${esc(phaseNote)}</b>` : ""}</div>
+    ${notStarted || (done && isToday) ? "" : `<div class="stack" style="gap:6px">
+      <span class="eyebrow">${isToday ? "Vandaag afvinken" : "Aanpassen: " + fmtShort(editKey)}${isToday ? "" : ` · <button class="linkbtn" data-today="${name}">terug naar vandaag</button>`}</span>
+      ${editIdx >= 0 && editIdx < sp.total ? slotsHTML(name, plan, editKey, editIdx) : ""}
+    </div>`}
+    ${footDoneNote}
+    <div class="stack" style="gap:8px">
+      ${cal}
+      <div class="legend"><span><i style="background:var(--accent)"></i>gedaan</span><span><i style="background:linear-gradient(135deg,var(--accent) 50%,var(--accent-soft) 50%)"></i>half</span><span><i style="background:var(--rx-soft)"></i>vergeten</span><span>Tik op een dag om die achteraf aan te passen.</span></div>
+    </div>
+    <div>${resetUI}</div>
+  </div>`;
+}
+
+function renderPlans() {
+  $("#plans").innerHTML = planHTML("voet") + planHTML("nagel");
+}
+
+$("#plans").addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.start) {
+    const name = t.dataset.start;
+    if (name === "voet") {
+      const prod = $("#voetProd").value;
+      S.voet = { product: prod, start: $("#voetStart").value || todayKey(), days: FOOT_OPTIONS[prod].days, log: {} };
+    } else {
+      S.nagel = { product: "nailner", start: $("#nagelStart").value || todayKey(), log: {} };
+    }
+    calPick[name] = null; save(name); renderPlans(); return;
+  }
+  if (t.dataset.slot !== undefined) {
+    const name = t.dataset.plan, k = t.dataset.day, i = Number(t.dataset.slot);
+    const plan = S[name];
+    const arr = (plan.log[k] || []).slice();
+    arr[i] = !arr[i];
+    if (arr.some(Boolean)) plan.log[k] = arr; else delete plan.log[k];
+    save(name); renderPlans(); return;
+  }
+  if (t.dataset.day && t.classList.contains("d")) {
+    const name = t.dataset.plan;
+    calPick[name] = t.dataset.day === todayKey() ? null : t.dataset.day;
+    renderPlans(); return;
+  }
+  if (t.dataset.today) { calPick[t.dataset.today] = null; renderPlans(); return; }
+  if (t.dataset.reset) { confirmReset = t.dataset.reset; renderPlans(); return; }
+  if (t.hasAttribute("data-reset-no")) { confirmReset = null; renderPlans(); return; }
+  if (t.dataset.resetYes) {
+    const name = t.dataset.resetYes;
+    S[name] = null; confirmReset = null; calPick[name] = null; save(name); renderPlans(); return;
+  }
+});
+
+/* ---------------- Notities ---------------- */
+const PLAN_LABEL = { voet: "Voet", nagel: "Nagel", algemeen: "Algemeen" };
+function renderNotes() {
+  const items = (S.notities && S.notities.items) || [];
+  $("#notes").innerHTML = items.length
+    ? items.slice().reverse().map(n => `<div class="n"><span class="when">${esc(fmtShort(n.d))}<br>${esc(PLAN_LABEL[n.p] || "")}</span><p>${esc(n.t)}</p><button class="linkbtn" data-del="${esc(n.id)}" aria-label="Notitie verwijderen">wis</button></div>`).join("")
+    : `<p class="small muted">Nog geen notities. Je eerste notitie verschijnt hier, met datum.</p>`;
+}
+$("#noteAdd").addEventListener("click", () => {
+  const t = $("#noteText").value.trim(); if (!t) { $("#noteText").focus(); return; }
+  const items = ((S.notities && S.notities.items) || []).slice(-199);
+  items.push({ id: Date.now().toString(36), d: todayKey(), p: $("#notePlan").value, t: t.slice(0, 1000) });
+  S.notities = { items };
+  $("#noteText").value = "";
+  save("notities"); renderNotes();
+});
+$("#notes").addEventListener("click", e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  S.notities = { items: S.notities.items.filter(n => n.id !== b.dataset.del) };
+  save("notities"); renderNotes();
+});
+
+/* ---------------- Start ---------------- */
+renderCats(); renderMeds(); renderDups(); renderKlachten(); renderAdvice(); renderPlans(); renderNotes();
+let startTab = location.hash.replace("#", "");
+if (!TABS.includes(startTab)) { try { startTab = localStorage.getItem(LS + "tab") || "behandeling"; } catch (e) { startTab = "behandeling"; } }
+showTab(startTab);
+connectDb();
+// nieuwe dag na middernacht: opnieuw tekenen
+setInterval(() => { if (renderPlans.lastDay !== todayKey()) { renderPlans.lastDay = todayKey(); renderPlans(); } }, 60000);
+renderPlans.lastDay = todayKey();
+})();
+</script>
