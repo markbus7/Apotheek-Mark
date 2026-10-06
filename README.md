@@ -14,4 +14,8 @@ Persoonlijke huisapotheek als webpagina:
 
 Voortgang wordt op het apparaat bewaard (localStorage). In de gepubliceerde Claude-artifact wordt het in de artifact-opslag bewaard.
 
+### Synchroniseren via GitHub (alleen op de GitHub-pagina)
+
+Onderaan het tabblad *Afvinken* kun je een klassiek GitHub-token met alleen het recht `gist` plakken. De voortgang gaat dan naar een geheime gist (`apotheek-mark.json`) op je eigen account, en een tweede apparaat met hetzelfde token vindt die vanzelf. Het token staat alleen in de localStorage van dat apparaat. Per onderdeel (voetkuur, nagelkuur, notities, wekelijkse klusjes) wint de laatste wijziging.
+
 > Informatie op basis van bijsluiters en de NHG-Standaard Dermatomycosen; geen vervanging voor advies van huisarts of apotheker.
