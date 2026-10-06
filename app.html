@@ -58,6 +58,7 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-
 h2 { font-size: 1.5rem; font-weight: 800; font-stretch: 112%; letter-spacing: -0.01em; }
 h3 { font-size: 1.12rem; font-weight: 700; font-stretch: 100%; }
 p { margin: 0; }
+a { color: var(--accent); }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .eyebrow { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
@@ -235,6 +236,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .shop { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
 .shop li { display: flex; justify-content: space-between; gap: var(--s3); padding: 8px 0; border-top: 1px solid var(--line); }
 .shop li span:last-child { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+
+/* GitHub-koppeling */
+.gh .steps li { grid-template-columns: 28px 1fr; }
+.gh .err { background: var(--rx-soft); color: var(--ink); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
+.gh .err b { color: var(--rx); }
+.gh .tokenrow { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: end; }
+.gh .tokenrow .field { flex: 1 1 240px; }
+.gh a.btn { text-decoration: none; display: inline-block; color: inherit; }
+.gh .mono { font-family: var(--f-mono); font-size: 0.78rem; overflow-wrap: anywhere; }
 
 /* Dubbelingen */
 .dup { display: grid; gap: var(--s3); }
@@ -414,6 +424,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
         <div class="notes" id="notes"></div>
       </div>
     </div>
+
+    <div class="card stack gh" id="ghCard" hidden></div>
   </section>
 
   <!-- ADVIES -->
@@ -691,6 +703,11 @@ const ORIGIN = { NL: "NL", MX: "Mexico", US: "VS", DE: "Duitsland", AR: "Argenti
 const LS = "apotheek-mark:";
 const lsGet = k => { try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) {} };
+const IN_VIEWER = !!(window.claude && typeof window.claude.use === "function");
+const T = lsGet("times") || {};   // wanneer elk onderdeel het laatst is gewijzigd (voor synchroniseren)
+const gh = Object.assign({ token: "", gist: "", last: 0 }, lsGet("gh") || {});
+gh.state = gh.token ? "klaar" : "uit";
+gh.msg = "";
 
 const S = {
   voet: lsGet("voet"),
@@ -702,7 +719,9 @@ let db = null;
 const queues = {};
 
 function save(name) {
+  T[name] = Date.now(); lsSet("times", T);
   lsSet(name, S[name]);
+  ghQueue();
   if (!db) return;
   const body = S[name] ? JSON.parse(JSON.stringify(S[name])) : null;
   const ref = db.doc("behandeling/" + name);
@@ -737,6 +756,165 @@ async function connectDb() {
     }, () => setSync("dit apparaat (artifact-opslag niet bereikbaar)"));
   }
 }
+
+/* ---------------- GitHub-sync (geheime gist) ---------------- */
+const GH_FILE = "apotheek-mark.json";
+const GH_KEYS = ["voet", "nagel", "notities", "wekelijks"];
+const TOKEN_URL = "https://github.com/settings/tokens/new?scopes=gist&description=" + encodeURIComponent("Apotheek Mark");
+let ghBusy = false, ghAgain = false, ghDirty = false, ghTimer = null;
+
+function ghSaveCfg() { lsSet("gh", { token: gh.token, gist: gh.gist, last: gh.last }); }
+async function ghFetch(path, opts) {
+  opts = opts || {};
+  const headers = { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + gh.token, "X-GitHub-Api-Version": "2022-11-28" };
+  if (opts.body) headers["Content-Type"] = "application/json";
+  const r = await fetch("https://api.github.com" + path, { method: opts.method || "GET", headers, body: opts.body });
+  if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+const hasData = k => k === "notities" ? !!(S.notities && S.notities.items.length)
+  : k === "wekelijks" ? !!(S.wekelijks && Object.keys(S.wekelijks.done || {}).length) : !!S[k];
+function stampLocal() {
+  let ch = false;
+  GH_KEYS.forEach(k => { if (!T[k] && hasData(k)) { T[k] = Date.now(); ch = true; } });
+  if (ch) lsSet("times", T);
+}
+function ghPayload() {
+  const data = {}; GH_KEYS.forEach(k => { data[k] = S[k] === undefined ? null : S[k]; });
+  return JSON.stringify({ v: 1, app: "apotheek-mark", saved: new Date().toISOString(), times: T, data });
+}
+async function ghFindGist() {
+  for (let page = 1; page <= 3; page++) {
+    const list = await ghFetch("/gists?per_page=100&page=" + page);
+    const hit = list.find(g => g.files && g.files[GH_FILE]);
+    if (hit) return hit.id;
+    if (list.length < 100) break;
+  }
+  return "";
+}
+async function ghCreate() {
+  const g = await ghFetch("/gists", { method: "POST", body: JSON.stringify({
+    description: "Apotheek Mark: voortgang (niet verwijderen)", public: false,
+    files: { [GH_FILE]: { content: ghPayload() } } }) });
+  return g.id;
+}
+async function ghPush() {
+  await ghFetch("/gists/" + gh.gist, { method: "PATCH", body: JSON.stringify({ files: { [GH_FILE]: { content: ghPayload() } } }) });
+}
+// Haalt de gist op en neemt per onderdeel de nieuwste versie over. Geeft true als er lokaal iets veranderde.
+async function ghPull() {
+  const g = await ghFetch("/gists/" + gh.gist);
+  const f = g.files && g.files[GH_FILE];
+  if (!f || typeof f.content !== "string") return false;
+  let remote; try { remote = JSON.parse(f.content); } catch (e) { return false; }
+  if (!remote || !remote.data) return false;
+  let changed = false;
+  for (const k of GH_KEYS) {
+    const rt = (remote.times && Number(remote.times[k])) || 0;
+    if (remote.data[k] === undefined || rt <= (T[k] || 0)) continue;
+    const v = remote.data[k];
+    S[k] = v === null ? (k === "notities" ? { items: [] } : k === "wekelijks" ? { done: {} } : null) : v;
+    T[k] = rt; lsSet(k, S[k]); changed = true;
+  }
+  if (changed) lsSet("times", T);
+  return changed;
+}
+function ghSetState(state, msg) {
+  gh.state = state; gh.msg = msg || "";
+  if (!db) {
+    const hhmm = gh.last ? new Date(gh.last).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }) : "";
+    setSync(gh.token ? (state === "fout" ? "dit apparaat (GitHub niet bereikbaar)" : "GitHub-gist" + (hhmm ? ", gesynchroniseerd " + hhmm : "")) : "dit apparaat");
+  }
+  renderGh();
+}
+function ghQueue() {
+  if (!gh.token || IN_VIEWER) return;
+  ghDirty = true; clearTimeout(ghTimer);
+  ghTimer = setTimeout(() => ghSync(true), 1500);
+}
+async function ghSync(forcePush) {
+  if (!gh.token || IN_VIEWER) return;
+  if (ghBusy) { ghAgain = true; return; }
+  ghBusy = true; ghSetState("bezig");
+  const wantPush = !!forcePush || ghDirty;
+  ghDirty = false;
+  try {
+    if (!gh.gist) gh.gist = await ghFindGist();
+    let changed = false;
+    if (gh.gist) {
+      try { changed = await ghPull(); } catch (e) { if (e.status === 404) gh.gist = ""; else throw e; }
+    }
+    if (!gh.gist) { stampLocal(); gh.gist = await ghCreate(); }
+    else if (wantPush) { stampLocal(); await ghPush(); }
+    gh.last = Date.now(); ghSaveCfg();
+    ghSetState("klaar");
+    if (changed) { renderPlans(); renderNotes(); renderVoetplan(); }
+  } catch (e) {
+    ghDirty = ghDirty || wantPush;
+    if (e.status === 401) {
+      gh.token = ""; gh.gist = ""; ghSaveCfg();
+      ghSetState("uit", "GitHub weigert dit token. Het is onjuist, verlopen of ingetrokken. Maak een nieuw token en koppel opnieuw.");
+    } else if (e.status === 403 || e.status === 404 || e.status === 422) {
+      ghSetState("fout", "GitHub geeft geen toegang (" + e.status + "). Heeft het token het vinkje “gist”? Een token met alleen repository-rechten (“github_pat_…”) kan geen gists beheren: maak een klassiek token. Tijdelijk gebruik van de limiet kan ook: probeer het later opnieuw.");
+    } else {
+      ghSetState("fout", "Geen verbinding met GitHub. Je voortgang staat veilig op dit apparaat en wordt later alsnog gesynchroniseerd.");
+    }
+  } finally {
+    ghBusy = false;
+    if (ghAgain) { ghAgain = false; ghSync(); }
+  }
+}
+function renderGh() {
+  const el = $("#ghCard");
+  if (IN_VIEWER) { el.hidden = true; return; }
+  el.hidden = false;
+  const hhmm = gh.last ? new Date(gh.last).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }) : "";
+  const err = gh.msg ? `<div class="err" role="alert"><b>Mislukt.</b> ${esc(gh.msg)}</div>` : "";
+  if (!gh.token) {
+    el.innerHTML = `<span class="eyebrow">Meerdere apparaten</span>
+      <h3>Voortgang bewaren op GitHub</h3>
+      <p class="small muted">Nu staat je voortgang alleen in de browser van dit apparaat. Met een token komt hij in een geheime gist op je eigen GitHub-account, en kun je op je telefoon en computer met dezelfde gegevens werken.</p>
+      <ol class="steps">
+        <li><span><a href="${TOKEN_URL}" target="_blank" rel="noopener">Maak een token op GitHub</a>. Het vinkje <b>gist</b> staat al aan; laat de rest uit. Kies zelf hoe lang het geldig blijft.</span></li>
+        <li><span>Kopieer het token en plak het hier. Het begint met <span class="mono">ghp_</span>.</span></li>
+      </ol>
+      ${err}
+      <form id="ghForm" class="tokenrow" autocomplete="off">
+        <div class="field"><label for="ghToken">GitHub-token</label>
+          <input id="ghToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_…" required></div>
+        <button class="btn primary" type="submit">Koppelen</button>
+      </form>
+      <p class="small muted">Het token blijft alleen in de browser van dit apparaat en kan niets anders dan gists beheren, dus niet je repositories. Een geheime gist staat niet in lijsten, maar iedereen met de link kan hem lezen. Zet daarom geen gevoelige dingen in je notities.</p>`;
+    return;
+  }
+  const pill = gh.state === "bezig" ? `<span class="pill check">Bezig…</span>` : gh.state === "fout" ? `<span class="pill rx">Niet gelukt</span>` : `<span class="pill cat">Gekoppeld</span>`;
+  el.innerHTML = `<span class="eyebrow">Meerdere apparaten</span>
+    <div class="row" style="justify-content:space-between"><h3>Voortgang staat op GitHub</h3>${pill}</div>
+    <p class="small muted">${hhmm ? "Laatst gesynchroniseerd om " + esc(hhmm) + ". " : ""}Wijzigingen worden binnen een paar seconden bewaard. Open je de site op een ander apparaat, plak dan hetzelfde token: je voortgang wordt vanzelf gevonden.</p>
+    ${err}
+    <div class="row">
+      <button class="btn primary" data-gh="sync"${gh.state === "bezig" ? " disabled" : ""}>Nu synchroniseren</button>
+      <button class="btn danger" data-gh="off">Ontkoppelen</button>
+      ${gh.gist ? `<a class="btn ghost" href="https://gist.github.com/${encodeURIComponent(gh.gist)}" target="_blank" rel="noopener">Bekijk bestand</a>` : ""}
+    </div>
+    <p class="small muted">Ontkoppelen wist het token van dit apparaat. Je voortgang blijft hier staan en de gist blijft op GitHub; verwijderen kan daar zelf.</p>`;
+}
+$("#ghCard").addEventListener("submit", e => {
+  e.preventDefault();
+  const tok = $("#ghToken").value.trim();
+  if (!tok) return;
+  if (!/^[\x21-\x7E]+$/.test(tok)) { gh.msg = "Dit lijkt geen token: het bevat spaties of vreemde tekens. Kopieer alleen het token zelf."; renderGh(); return; }
+  gh.token = tok; gh.gist = ""; gh.msg = ""; ghSaveCfg();
+  ghSync(true);
+});
+$("#ghCard").addEventListener("click", e => {
+  const b = e.target.closest("[data-gh]"); if (!b) return;
+  if (b.dataset.gh === "sync") ghSync(true);
+  if (b.dataset.gh === "off") { clearTimeout(ghTimer); gh.token = ""; gh.gist = ""; gh.last = 0; ghSaveCfg(); ghSetState("uit"); }
+});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && gh.token && !IN_VIEWER && Date.now() - gh.last > 30000) ghSync();
+});
 
 /* ---------------- Tabs ---------------- */
 const TABS = ["voetplan", "behandeling", "advies", "kastje", "dubbel"];
@@ -1145,6 +1323,8 @@ let startTab = location.hash.replace("#", "");
 if (!TABS.includes(startTab)) { try { startTab = localStorage.getItem(LS + "tab") || "voetplan"; } catch (e) { startTab = "voetplan"; } }
 showTab(startTab);
 connectDb();
+renderGh();
+if (gh.token && !IN_VIEWER) ghSync();
 // nieuwe dag na middernacht: opnieuw tekenen
 setInterval(() => { if (renderPlans.lastDay !== todayKey()) { renderPlans.lastDay = todayKey(); renderPlans(); renderVoetplan(); } }, 60000);
 renderPlans.lastDay = todayKey();
