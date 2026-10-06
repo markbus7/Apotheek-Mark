@@ -165,6 +165,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .cal .d.future { opacity: .45; cursor: default; }
 .cal .d.today { outline: 2px solid var(--ink); outline-offset: 1px; }
 .cal .d.off { visibility: hidden; }
+.cal .d.rest { background: transparent; border-style: dashed; opacity: .5; cursor: default; }
 .cal .d[aria-pressed="true"] { outline: 3px solid var(--sticker); outline-offset: 1px; }
 .legend { display: flex; gap: var(--s3); flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
@@ -294,7 +295,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
         <h3>Ochtend</h3>
         <ol class="steps">
           <li><span>Voeten wassen en <b>goed droogdeppen</b>, ook tussen alle tenen. Eventueel even de föhn op koud.</span></li>
-          <li><span><b>Nailner</b> op alle gele, dikke nagels, ook de rand en onderkant. 1–2 minuten laten drogen. <span class="muted">(alleen week 1–4)</span></span></li>
           <li><span><b>Mycelvan</b> dun op beide voeten: hele zool, hielen, zijkanten tot 2 cm hoog en tussen alle tenen. Niet op de nagels.</span></li>
           <li><span>Laten intrekken. Blijft de huid tussen de tenen week of wit? Dan een <b>teenspreider</b> of reepje gaas ertussen.</span></li>
           <li><span>Schone katoenen of wollen sokken en de schoenen van vandaag (niet die van gisteren).</span></li>
@@ -305,10 +305,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
         <h3>Avond</h3>
         <ol class="steps">
           <li><span>Voeten wassen en goed droogdeppen.</span></li>
-          <li><span><b>Nailner</b> op alle aangetaste nagels. Vanaf week 5 is dit je enige Nailner-moment van de dag.</span></li>
-          <li><span>5 minuten later: <b>Balea Urea 10%</b> dun op hielen en voetzool. Niet tussen de tenen (prikt op kapotte huid).</span></li>
-          <li><span>Avond voor de vijldag: ook wat Urea op de dikke nagels, dan vijlen ze makkelijker.</span></li>
-          <li><span>Slaap zonder sokken, of met dunne katoenen sokken als de Urea anders aan het laken plakt.</span></li>
+          <li><span><b>Eén keer per week</b> (bijvoorbeeld zondagavond), zodra je de nagellak hebt: aangetaste nagels dun vijlen, schoonmaken met een alcoholdoekje, een dun laagje <b>amorolfine-nagellak</b> en 3 minuten laten drogen.</span></li>
+          <li><span><b>Balea Urea</b> dun op hielen en voetzool tegen droge, gespannen huid. Niet tussen de tenen (prikt op kapotte huid) en niet op de nagels. Het is verzorging, geen schimmelmiddel.</span></li>
+          <li><span>Slaap zonder sokken, of met dunne katoenen sokken als de crème anders aan het laken plakt.</span></li>
         </ol>
       </div>
     </div>
@@ -321,15 +320,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
           <thead><tr><th>Plek</th><th>Ochtend</th><th>Avond</th><th>Hoe lang</th></tr></thead>
           <tbody>
             <tr><td>Tussen alle tenen</td><td><span class="prod">Mycelvan</span></td><td class="none">droog houden</td><td>4 weken, daarna 1× per week</td></tr>
-            <tr><td>Voetzool en zijkant (2 cm hoog)</td><td><span class="prod">Mycelvan</span></td><td><span class="prod">Urea 10%</span></td><td>4 weken; Urea daarna zo nodig</td></tr>
-            <tr><td>Hielen</td><td><span class="prod">Mycelvan</span></td><td><span class="prod">Urea 10%</span></td><td>4 weken; Urea blijven gebruiken tegen eelt</td></tr>
-            <tr><td>Gele, dikke nagels (+ rand en onderkant)</td><td><span class="prod">Nailner</span> <span class="muted small">wk 1–4</span></td><td><span class="prod">Nailner</span></td><td>Tot de nagel is uitgegroeid: 8–12 maanden</td></tr>
+            <tr><td>Voetzool en zijkant (2 cm hoog)</td><td><span class="prod">Mycelvan</span></td><td><span class="prod">Balea</span></td><td>4 weken; Balea daarna zo nodig</td></tr>
+            <tr><td>Hielen</td><td><span class="prod">Mycelvan</span></td><td><span class="prod">Balea</span></td><td>4 weken; Balea blijven gebruiken tegen droge huid</td></tr>
+            <tr><td>Gele, dikke nagels (+ rand en onderkant)</td><td class="none">—</td><td><span class="prod">Nagellak</span> <span class="muted small">1× per week</span></td><td>Tot de nagel is uitgegroeid: 9–12 maanden</td></tr>
             <tr><td>Zwarte nagel 2e teen</td><td class="none">niets</td><td class="none">niets</td><td>Groeit vanzelf uit; elke maand een foto</td></tr>
             <tr><td>Na de kuur: zolen en tussen tenen</td><td><span class="prod">Mycelvan</span> <span class="muted small">1× per week</span></td><td class="none">—</td><td>Blijvend, tegen terugkeer</td></tr>
           </tbody>
         </table>
       </div>
       <p class="small muted">Eén tube Mycelvan tegelijk open. Voor twee voeten, hele zool, gebruik je ongeveer een tube per 2–3 weken: met je 4 tubes kom je de kuur en maanden nazorg door.</p>
+      <p class="small muted"><b>Over Balea:</b> 10% ureum houdt vocht vast en verzacht droge, gespannen huid (dat staat ook op de tube). Eelt of dikke nagels verweken pas bij 25–40% ureum.</p>
     </div>
 
     <div class="grid2">
@@ -348,6 +348,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
         <span class="eyebrow">Nog in huis halen</span>
         <h3>Boodschappenlijst</h3>
         <ul class="shop">
+          <li><span><b>Nagellak met amorolfine 5%</b> (bijvoorbeeld Loceryl), 3 ml</span><span>nodig</span></li>
           <li><span>Teenspreiders van siliconen</span><span>als nodig</span></li>
           <li><span>Wegwerp-nagelvijlen, of één vijl alleen voor de aangetaste nagels</span><span>nodig</span></li>
           <li><span>Eigen nagelknipper voor de voeten</span><span>nodig</span></li>
@@ -355,8 +356,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
           <li><span>Tweede paar schoenen om af te wisselen</span><span>aanrader</span></li>
           <li><span>Badslippers voor zwembad, sportschool en hotel</span><span>aanrader</span></li>
           <li><span>Afspraak medisch pedicure: dikke nagels laten dunnen, elke 4–6 weken</span><span>aanrader</span></li>
+          <li><span>Ureumcrème 25–40% voor eelt en hele dikke huid</span><span>optioneel</span></li>
         </ul>
-        <p class="small muted">Al in huis: Mycelvan (4 tubes), Balea Urea, Nailner (3 pennen), Micotex voor de nazorg.</p>
+        <p class="small">Vraag in de apotheek of bij de drogist naar de amorolfine-nagellak en of je hem zonder recept krijgt. Anders kan de huisarts hem voorschrijven.</p>
+        <p class="small muted">Al in huis: Mycelvan (4 tubes), Balea Urea, Micotex voor de nazorg. De oude Nailner is over datum en kan weg.</p>
       </div>
     </div>
 
@@ -450,7 +453,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   <section class="panel" id="p-dubbel" role="tabpanel" aria-labelledby="tab-dubbel" hidden>
     <div class="callout">
       <h3>Kort gezegd</h3>
-      <p>Je hebt 25 producten, maar eigenlijk maar 4 soorten schimmelmiddel. Gebruik er <b>één tegelijk</b>, maak eerst een geopende tube op en combineer middelen uit dezelfde groep niet: dat werkt niet beter en irriteert de huid wel.</p>
+      <p>Je hebt <span id="dupCount">24</span> producten, maar eigenlijk maar 4 soorten schimmelmiddel. Gebruik er <b>één tegelijk</b>, maak eerst een geopende tube op en combineer middelen uit dezelfde groep niet: dat werkt niet beter en irriteert de huid wel.</p>
     </div>
     <div class="grid2" id="dups"></div>
   </section>
@@ -534,10 +537,10 @@ const MEDS = [
     note: "Behandelt de <em>huid</em> rond de nagel, niet de nagel zelf. Eén flesje is nog verzegeld." },
 
   // Nagels
-  { id: "nailner", name: "Nailner 2-in-1 kalknagelpen", active: "Medisch hulpmiddel op zuurbasis (verlaagt de pH in de nagel)", cat: "nagel", group: "nagel", qty: "1 pen in gebruik + voordeelverpakking 2 × 4 ml", origin: "NL", best: true,
-    use: "Kalknagel (schimmelnagel): verkleurde, verdikte of brokkelige nagel.",
-    how: "Eerste 4 weken 2× per dag ('s ochtends en 's avonds), daarna 1× per dag tot de nagel helemaal is uitgegroeid (teennagel 8–12 maanden).",
-    note: "<strong>Eerste keus</strong> voor je nagels. Smeer ook de rand en onderkant van de nagel. Gebruik de pennen één voor één; 2 × 4 ml is samen ongeveer 800 behandelingen." },
+  { id: "amorolfine", name: "Amorolfine 5% nagellak (bijvoorbeeld Loceryl)", active: "Amorolfine 5% nagellak", cat: "nagel", group: "nagel", qty: "3 ml", origin: "NL", best: true, buy: true,
+    use: "Kalknagel (schimmelnagel): gele, dikke of brokkelige nagel.",
+    how: "1× per week (soms 2×). Eerst de nagel dun vijlen en schoonmaken met alcohol, dan een dun laagje lakken en 3 minuten laten drogen. Doorgaan tot de nagel helemaal is uitgegroeid (teen 9–12 maanden).",
+    note: "<strong>Eerste keus</strong> voor je nagels zonder tabletten. Nog niet in huis: vraag in de apotheek of bij de drogist of je hem zonder recept kunt krijgen, anders kan de huisarts hem voorschrijven." },
 
   // Corticosteroïden
   { id: "triace", name: "Triamcinolonacetonide 0,1% zalf (ACE)", active: "Triamcinolonacetonide 1 mg/g, cetomacrogolzalf", cat: "steroid", group: "steroid", qty: "30 g", origin: "NL", rx: true, check: "Na openen 3 maanden houdbaar",
@@ -555,9 +558,9 @@ const MEDS = [
     how: "Dun op een klein, onbeschadigd huidgebied; enkele keren per dag.",
     note: "Niet op open wondjes of grote oppervlakken. Behandelt geen schimmel, dempt alleen het branden." },
   { id: "balea", name: "Balea Urea voetcrème", active: "Ureum 10%", cat: "huid", group: "vocht", qty: "tube", origin: "DE",
-    use: "Zeer droge voeten, eelt en kloven in de hielen.",
-    how: "1–2× per dag op de hielen en zool.",
-    note: "Ureum verweekt eelt en dikke nagels: smeer het ook op de kalknagel, dan dringt Nailner beter door. Niet op kapotte huid tussen de tenen (prikt)." },
+    use: "Zeer droge voeten: verzorgt droge, gespannen huid op hielen en zool (\"vermindert Spannungsgefühle\"). Volgens de verpakking geschikt voor diabetici.",
+    how: "1–2× per dag op hielen en zool.",
+    note: "<strong>Verzorging, geen medicijn.</strong> 10% ureum houdt vocht vast. Eelt of dikke nagels verweken pas bij 25–40% ureum. Niet op de nagels en niet op kapotte huid tussen de tenen (prikt)." },
   { id: "vaseline", name: "Vaseline-cetomacrogolcrème", active: "Vaseline in cetomacrogolcrème", cat: "huid", group: "vocht", qty: "100 g", origin: "NL",
     use: "Droge huid, basisverzorging bij eczeem.",
     how: "1–3× per dag, zo vaak als nodig.",
@@ -628,7 +631,7 @@ const DUPS = [
     ] },
   { title: "Huidcrèmes", sub: "Verzorging, geen medicijn. Je kunt ze naast elkaar gebruiken op verschillende plekken.",
     order: [
-      ["balea", "Voeten: hielen, eelt en dikke nagels."],
+      ["balea", "Voeten: droge, gespannen huid op hielen en zool."],
       ["vaseline", "Lichaam: basiscrème voor droge huid."],
       ["eucerin", "Bij eczeemgevoelige, jeukende huid."],
     ] },
@@ -640,13 +643,13 @@ const KLACHTEN = [
     picks: [["mycelvan", "1× per dag, 1 week. Ook tussen de tenen die er gezond uitzien."], ["lamisilonce", "Eén keer smeren als dagelijks smeren niet lukt."], ["lotriminuno", "Als terbinafine na 2 weken niet helpt: 1× per dag, 3 weken."]],
     doc: ["Na 2–4 weken goed smeren geen verbetering", "Het komt steeds terug: vraag de huisarts om een schimmelkweek, het kan ook eczeem zijn"] },
   { id: "zool", label: "Droge schilfers op voetzool of zijkant",
-    picks: [["mycelvan", "1× per dag ('s ochtends), 4 weken, op de hele zool, hielen en zijkant. Start de voetzool-kuur bij Afvinken."], ["balea", "'s Avonds op hielen en zool: verweekt de schilfers zodat de crème beter werkt."], ["ketocf", "Reserve: 2× per dag tot 1 week na genezing."]],
+    picks: [["mycelvan", "1× per dag ('s ochtends), 4 weken, op de hele zool, hielen en zijkant. Start de voetzool-kuur bij Afvinken."], ["balea", "'s Avonds op hielen en zool tegen droge, gespannen huid. Verzorging, geen schimmelmiddel."], ["ketocf", "Reserve: 2× per dag tot 1 week na genezing."]],
     doc: ["Dikke, schilferende 'mocassin'-voet die niet reageert op crème: soms zijn tabletten nodig"] },
   { id: "nat", label: "Witte, natte, kapotte huid tussen de tenen",
     picks: [["miconazol", "2× per dag; helpt ook tegen gist en bacteriën."], ["mycelvan", "Als het na een paar dagen droger is, kan terbinafine ook."]],
     doc: ["Rode, warme, gezwollen voet of streep omhoog, koorts of pus: dat is een bacteriële infectie. Dezelfde dag naar de huisarts"] },
   { id: "kalk", label: "Kalknagel: verkleurd, dik of brokkelig",
-    picks: [["nailner", "4 weken 2× per dag, daarna 1× per dag tot de nagel is uitgegroeid (8–12 maanden). Start in de tracker."], ["balea", "Ureum op de nagel maakt hem zachter, dan dringt Nailner beter in."], ["mycelvan", "Behandel ook de voetschimmel ernaast, anders blijft de nagel besmet raken."]],
+    picks: [["amorolfine", "1× per week op alle aangetaste nagels, na dun vijlen en schoonmaken. Start in Afvinken."], ["mycelvan", "Behandel ook de voetschimmel ernaast, anders blijft de nagel besmet raken."]],
     doc: ["Meer dan de helft van de nagel of meerdere nagels aangetast", "Het nagelbed (de basis) doet mee, of de nagel doet pijn", "Je hebt diabetes of slechte doorbloeding", "Na 6 maanden geen gezonde nagel die aangroeit: tabletten (terbinafine) van de huisarts werken veel beter dan iets op de nagel"] },
   { id: "rand", label: "Rode, jeukende huid rond de nagel",
     picks: [["funginail", "2× per dag op de huid rond de nagel."], ["mycelvan", "Alternatief: 1× per dag terbinafinecrème om de nagel."]],
@@ -655,7 +658,7 @@ const KLACHTEN = [
     picks: [["micotex", "'s Ochtends op droge voeten; ook als nazorg na een kuur."], ["tiny", "Tegen geur."]],
     doc: ["Zweet zo erg dat het je dagelijks leven beperkt"] },
   { id: "hiel", label: "Droge hielen, eelt en kloven",
-    picks: [["balea", "1–2× per dag; ureum verweekt eelt."], ["vaseline", "'s Avonds dik smeren, sokken aan."]],
+    picks: [["balea", "1–2× per dag tegen droge, gespannen hielen. Voor echt eelt is ureum 25–40% nodig."], ["vaseline", "'s Avonds dik smeren, sokken aan."]],
     doc: ["Diepe, bloedende kloven die niet genezen, zeker bij diabetes"] },
   { id: "eczeem", label: "Droge, jeukende huid of eczeem (geen schimmel)",
     picks: [["vaseline", "Dagelijks als basis."], ["eucerin", "Rijker alternatief bij eczeemgevoelige huid."], ["trimylan", "Alleen bij een opvlamming en zoals voorgeschreven. Nooit op schimmel."]],
@@ -676,7 +679,7 @@ const KLACHTEN = [
 
 /* ---------------- Behandelplannen ---------------- */
 const FOOT_OPTIONS = {
-  zool:        { label: "Voetzool-kuur: Mycelvan + Urea", perDay: 2, days: 28, slots: ["Ochtend · Mycelvan", "Avond · Urea"], how: "Ochtend: Mycelvan op hele zool, hielen, zijkanten en tussen alle tenen. Avond: Urea 10% op hielen en zool. 4 weken, daarna 1× per week Mycelvan." },
+  zool:        { label: "Voetzool-kuur: Mycelvan + Balea", perDay: 2, days: 28, slots: ["Ochtend · Mycelvan", "Avond · Balea"], how: "Ochtend: Mycelvan op hele zool, hielen, zijkanten en tussen alle tenen. Avond: Balea Urea op hielen en zool (verzorging). 4 weken, daarna 1× per week Mycelvan." },
   mycelvan:    { label: "Mycelvan (terbinafine) crème", perDay: 1, days: 14, how: "1× per dag dun, ook 2 cm rondom. Tussen de tenen is 1 week vaak genoeg; zool/zijkant 2 weken." },
   lamisil:     { label: "Lamisil crème (terbinafine)",  perDay: 1, days: 14, how: "1× per dag dun, 1–2 weken." },
   lotriminuno: { label: "Lotrimin-Uno (bifonazol)",     perDay: 1, days: 21, how: "1× per dag 's avonds, 3 weken." },
@@ -684,7 +687,13 @@ const FOOT_OPTIONS = {
   miconazol:   { label: "Miconazol Sandoz",             perDay: 2, days: 28, how: "2× per dag, door tot 1 week nadat de huid normaal is." },
   lamisilonce: { label: "Lamisil Once (eenmalig)",      perDay: 1, days: 1,  how: "Eén keer beide voeten, 24 uur niet wassen. Daarna alleen nog de hygiëne-tips volgen." },
 };
-const NAIL = { label: "Nailner 2-in-1 kalknagelpen", phase1: 28, days: 365 };
+const LAK_HOW = "Op dezelfde dag(en) per week: nagel eerst dun vijlen (ook de bovenkant), schoonmaken met een alcoholdoekje, een dun laagje lakken en 3 minuten laten drogen. Doorgaan tot de nagel helemaal is uitgegroeid (teen 9–12 maanden).";
+const NAIL_OPTIONS = {
+  amorolfine:  { label: "Amorolfine 5% nagellak · 1× per week", days: 365, weekly: true, at: i => i % 7 === 0 ? 1 : 0, slotsAt: () => ["Nagellak aangebracht"], how: LAK_HOW },
+  amorolfine2: { label: "Amorolfine 5% nagellak · 2× per week", days: 365, weekly: true, at: i => (i % 7 === 0 || i % 7 === 3) ? 1 : 0, slotsAt: () => ["Nagellak aangebracht"], how: LAK_HOW },
+  nailner:     { label: "Nailner kalknagelpen (nieuw kopen)", days: 365, phase1: 28, at: i => i < 28 ? 2 : 1, slotsAt: i => i < 28 ? ["Ochtend", "Avond"] : ["Avond"],
+                 how: "Eerste 4 weken 2× per dag, daarna 1× per dag. Vijl de bovenkant van de nagel 1× per week licht op met een eigen vijl." },
+};
 
 /* ---------------- Hulpfuncties ---------------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -939,6 +948,7 @@ $(".tabs").addEventListener("keydown", e => {
 let catSel = "alle";
 function pills(m) {
   const out = [`<span class="pill cat">${esc(CATS[m.cat])}</span>`];
+  if (m.buy) out.push(`<span class="pill check">Nog kopen</span>`);
   if (m.best) out.push(`<span class="pill best">Eerste keus</span>`);
   if (m.rx) out.push(`<span class="pill rx">Recept</span>`);
   if (m.expired) out.push(`<span class="pill exp">Over datum</span>`);
@@ -976,7 +986,9 @@ $("#catFilter").addEventListener("click", e => {
   catSel = b.dataset.cat; renderCats(); renderMeds();
 });
 $("#q").addEventListener("input", renderMeds);
-$("#kastCount").textContent = MEDS.length;
+const OWNED = MEDS.filter(m => !m.buy).length;
+$("#kastCount").textContent = OWNED;
+$("#dupCount").textContent = OWNED;
 
 /* ---------------- Dubbelingen ---------------- */
 function renderDups() {
@@ -1026,9 +1038,8 @@ function planSpec(name, plan) {
     return { label: o.label, total: plan.days || o.days, perDayAt: () => o.perDay, how: o.how,
       slotsAt: () => o.slots || slotNames(o.perDay) };
   }
-  return { label: NAIL.label, total: NAIL.days, perDayAt: i => i < NAIL.phase1 ? 2 : 1,
-    slotsAt: i => i < NAIL.phase1 ? ["Ochtend", "Avond"] : ["Avond"],
-    how: "Eerste 4 weken 2× per dag, daarna 1× per dag. Vijl de bovenkant van de nagel 1× per week licht op met een eigen vijl." };
+  const o = NAIL_OPTIONS[plan.product] || NAIL_OPTIONS.amorolfine;
+  return { label: o.label, total: o.days, perDayAt: o.at, slotsAt: o.slotsAt, how: o.how, phase1: o.phase1 || 0, weekly: !!o.weekly };
 }
 function slotNames(n) { return n === 2 ? ["Ochtend", "Avond"] : ["Vandaag"]; }
 
@@ -1041,6 +1052,7 @@ function stats(name, plan) {
   for (let i = last; i >= 0; i--) {
     const k = keyOf(addDays(start, i));
     const need = sp.perDayAt(i);
+    if (need === 0) continue;   // rustdag (bijvoorbeeld bij een wekelijks middel)
     const got = (plan.log[k] || []).filter(Boolean).length;
     expected += need; done += Math.min(got, need);
     if (streakOpen) {
@@ -1065,13 +1077,14 @@ function calHTML(name, plan, from, count) {
     const got = (plan.log[k] || []).filter(Boolean).length;
     const fut = k > today;
     let cls = "d";
-    if (fut) cls += " future";
+    if (need === 0) cls += " rest";
+    else if (fut) cls += " future";
     else if (got >= need) cls += " full";
     else if (got > 0) cls += " half";
     else if (k < today) cls += " miss";
     if (k === today) cls += " today";
     const sel = calPick[name] === k ? ' aria-pressed="true"' : "";
-    h += `<button class="${cls}" data-day="${k}" data-plan="${name}" ${fut ? "disabled" : ""}${sel} aria-label="${fmtShort(k)}: ${got} van ${need}">${d.getDate()}</button>`;
+    h += `<button class="${cls}" data-day="${k}" data-plan="${name}" ${fut || need === 0 ? "disabled" : ""}${sel} aria-label="${fmtShort(k)}: ${got} van ${need}">${d.getDate()}</button>`;
   }
   return `<div class="cal">${h}</div>`;
 }
@@ -1081,6 +1094,10 @@ function slotsHTML(name, plan, k, idx) {
   const need = sp.perDayAt(idx);
   const got = plan.log[k] || [];
   const names = sp.slotsAt(idx);
+  if (need === 0) {
+    let n = idx + 1; while (n < sp.total && sp.perDayAt(n) === 0) n++;
+    return `<p class="small muted">Geen smeerdag. Volgende keer: <b>${esc(fmtShort(keyOf(addDays(parseKey(plan.start), n))))}</b>.</p>`;
+  }
   return `<div class="slots">${names.map((n, i) => `<button class="slot" data-plan="${name}" data-day="${k}" data-slot="${i}" aria-pressed="${!!got[i]}">
       <span class="t">${got[i] ? "✓ " : ""}${n}</span><span class="s">${got[i] ? "gedaan" : "nog doen"}</span></button>`).join("")}</div>`;
 }
@@ -1090,7 +1107,7 @@ function setupHTML(name) {
   if (name === "voet") {
     return `<div class="card plan">
       <div class="plan-head"><div class="stack" style="gap:4px"><span class="eyebrow">Voetschimmel</span><h2>Nog geen kuur gestart</h2></div></div>
-      <p class="muted">Kies een kuur en startdatum. Advies voor jouw voeten: de voetzool-kuur, 4 weken (ochtend Mycelvan, avond Urea). Daarna vink je elke dag af en zie je hoe ver je bent.</p>
+      <p class="muted">Kies een kuur en startdatum. Advies voor jouw voeten: de voetzool-kuur, 4 weken (ochtend Mycelvan, avond Balea). Daarna vink je elke dag af en zie je hoe ver je bent.</p>
       <div class="setup">
         <div class="field"><label for="voetProd">Middel</label>
           <select id="voetProd">${Object.entries(FOOT_OPTIONS).map(([k, o]) => `<option value="${k}">${esc(o.label)} · ${o.perDay}× p/d · ${o.days} d</option>`).join("")}</select></div>
@@ -1101,8 +1118,10 @@ function setupHTML(name) {
   }
   return `<div class="card plan">
     <div class="plan-head"><div class="stack" style="gap:4px"><span class="eyebrow">Kalknagel</span><h2>Nog niet gestart</h2></div></div>
-    <p class="muted">Nailner: 4 weken 2× per dag, daarna 1× per dag tot de nagel helemaal is uitgegroeid (± 12 maanden voor een teennagel).</p>
+    <p class="muted">Advies: amorolfine 5% nagellak, 1× per week, tot de nagel helemaal is uitgegroeid (9–12 maanden voor een teennagel). Kies je startdatum zodra je de nagellak hebt.</p>
     <div class="setup">
+      <div class="field"><label for="nagelProd">Middel</label>
+        <select id="nagelProd">${Object.entries(NAIL_OPTIONS).map(([k, o]) => `<option value="${k}">${esc(o.label)}</option>`).join("")}</select></div>
       <div class="field"><label for="nagelStart">Startdatum</label><input id="nagelStart" type="date" value="${t}"></div>
       <button class="btn primary" data-start="nagel">Start behandeling</button>
     </div>
@@ -1130,9 +1149,9 @@ function planHTML(name) {
   } else headline = `<div class="daybig num">Dag ${day} <small>van ${sp.total}</small></div>`;
 
   let progress = "";
-  if (name === "nagel") {
-    const p1 = Math.min(1, Math.max(0, (idxToday + 1) / NAIL.phase1));
-    const p2 = Math.min(1, Math.max(0, (idxToday + 1 - NAIL.phase1) / (NAIL.days - NAIL.phase1)));
+  if (name === "nagel" && sp.phase1) {
+    const p1 = Math.min(1, Math.max(0, (idxToday + 1) / sp.phase1));
+    const p2 = Math.min(1, Math.max(0, (idxToday + 1 - sp.phase1) / (sp.total - sp.phase1)));
     progress = `<div class="phases" aria-label="Fases">
       <div><div class="seg"><span style="width:${p1 * 100}%"></span></div><span class="lbl">4 wk · 2×/dag</span></div>
       <div><div class="seg"><span style="width:${p2 * 100}%"></span></div><span class="lbl">Fase 2 · 1× per dag tot de nagel is uitgegroeid</span></div>
@@ -1150,8 +1169,8 @@ function planHTML(name) {
     cal = calHTML(name, plan, from, upto - from + 1);
   }
 
-  const phaseNote = name === "nagel" && !done && !notStarted
-    ? (idxToday < NAIL.phase1 ? `Fase 1: nog ${NAIL.phase1 - idxToday} dagen 2× per dag.` : "Fase 2: 1× per dag. Volhouden tot de gezonde nagel er helemaal is.")
+  const phaseNote = name === "nagel" && sp.phase1 && !done && !notStarted
+    ? (idxToday < sp.phase1 ? `Fase 1: nog ${sp.phase1 - idxToday} dagen 2× per dag.` : "Fase 2: 1× per dag. Volhouden tot de gezonde nagel er helemaal is.")
     : "";
   const footDoneNote = name === "voet" && done
     ? `<p class="small">Kuur afgerond. Is de huid nog niet helemaal rustig? Ga door tot 1 week na genezing of kijk bij <i>Wat gebruik ik?</i> voor het volgende middel. Daarna: Micotex als nazorg.</p>` : "";
@@ -1180,7 +1199,7 @@ function planHTML(name) {
     ${footDoneNote}
     <div class="stack" style="gap:8px">
       ${cal}
-      <div class="legend"><span><i style="background:var(--accent)"></i>gedaan</span><span><i style="background:linear-gradient(135deg,var(--accent) 50%,var(--accent-soft) 50%)"></i>half</span><span><i style="background:var(--rx-soft)"></i>vergeten</span><span>Tik op een dag om die achteraf aan te passen.</span></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>gedaan</span>${sp.weekly ? '<span><i style="border-style:dashed;background:transparent"></i>geen smeerdag</span>' : ""}<span><i style="background:linear-gradient(135deg,var(--accent) 50%,var(--accent-soft) 50%)"></i>half</span><span><i style="background:var(--rx-soft)"></i>vergeten</span><span>Tik op een dag om die achteraf aan te passen.</span></div>
     </div>
     <div>${resetUI}</div>
   </div>`;
@@ -1198,7 +1217,7 @@ $("#plans").addEventListener("click", e => {
       const prod = $("#voetProd").value;
       S.voet = { product: prod, start: $("#voetStart").value || todayKey(), days: FOOT_OPTIONS[prod].days, log: {} };
     } else {
-      S.nagel = { product: "nailner", start: $("#nagelStart").value || todayKey(), log: {} };
+      S.nagel = { product: $("#nagelProd").value, start: $("#nagelStart").value || todayKey(), log: {} };
     }
     calPick[name] = null; save(name); renderPlans(); renderVoetplan(); return;
   }
@@ -1250,13 +1269,18 @@ function renderVoetplan() {
   const vDays = v ? planSpec("voet", v).total : 28;
   const inRange = (a, b) => a && today >= a && today <= b;
   const range = (a, days) => a ? `${fmtShort(keyOf(a))} – ${fmtShort(keyOf(addDays(a, days - 1)))}` : "start bij Afvinken";
+  const nSpec = n ? planSpec("nagel", n) : null;
+  const nDays = nSpec ? nSpec.total : 365;
   const evalDate = nStart ? addDays(nStart, 182) : null;
+  const nailLi = n && n.product === "nailner"
+    ? ["Nailner: week 1–4 2× per dag, daarna 's avonds", "Elke week dun vijlen, kort en recht knippen", "Elke 4–6 weken medisch pedicure (aanrader)"]
+    : ["Amorolfine-nagellak: 1× per week op alle aangetaste nagels", "Vóór het lakken dun vijlen en schoonmaken met alcohol", "Elke 4–6 weken medisch pedicure (aanrader)"];
   const after = v ? addDays(vStart, vDays) : null;
   const phases = [
     { cls: inRange(vStart, addDays(vStart || today, vDays - 1)) ? "now" : "", ttl: "1 · Huid", when: v ? range(vStart, vDays) : "week 1–4 · nog niet gestart",
-      li: ["Ochtend: Mycelvan op hele zool, hielen, zijkant en tussen alle tenen", "Avond: Urea 10% op hielen en zool", "Huid na 2–4 weken rustig"] },
-    { cls: inRange(nStart, addDays(nStart || today, NAIL.days)) ? "now" : "", ttl: "2 · Nagels", when: n ? `vanaf ${fmtShort(n.start)} · 8–12 maanden` : "maand 1–12 · nog niet gestart",
-      li: ["Nailner: week 1–4 2× per dag, daarna 's avonds", "Elke week dun vijlen, kort en recht knippen", "Elke 4–6 weken medisch pedicure (aanrader)"] },
+      li: ["Ochtend: Mycelvan op hele zool, hielen, zijkant en tussen alle tenen", "Avond: Balea Urea op hielen en zool (verzorging)", "Huid na 2–4 weken rustig"] },
+    { cls: inRange(nStart, addDays(nStart || today, nDays)) ? "now" : "", ttl: "2 · Nagels", when: n ? `vanaf ${fmtShort(n.start)} · 9–12 maanden` : "maand 1–12 · nog niet gestart",
+      li: nailLi },
     { cls: "eval", ttl: "Evaluatie", when: evalDate ? fmtLong(evalDate) : "na 6 maanden",
       li: ["Groeit er bij de nagelriem helder, gezond nagel aan? Doorgaan.", "Nee? Naar de huisarts: nagelonderzoek en eventueel tabletten."] },
     { cls: after && today >= after ? "now" : "", ttl: "3 · Nazorg", when: after ? `vanaf ${fmtShort(keyOf(after))} · blijvend` : "na de huidkuur · blijvend",
