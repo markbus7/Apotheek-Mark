@@ -2,7 +2,8 @@
 
 Persoonlijke huisapotheek als webpagina:
 
-- **Behandeling** – dagelijkse tracker voor een voetschimmelkuur en de kalknagelbehandeling (Nailner), met kalender, voortgang en notities.
+- **Voetplan** – stappenplan zonder tabletten: fases (huid, nagels, evaluatie, nazorg), ochtend- en avondschema, wat je waar smeert, teenspreiders, boodschappenlijst en wekelijkse klusjes.
+- **Afvinken** – dagelijkse tracker voor de voetkuur (o.a. voetzool-kuur Mycelvan + Balea) en de nagelbehandeling (amorolfine-nagellak 1× of 2× per week, of een Nailner-pen), met kalender, voortgang en notities.
 - **Wat gebruik ik?** – per klacht welk middel uit het kastje de eerste keus is, wat het alternatief is en wanneer je naar de huisarts gaat.
 - **Kastje** – alle middelen met werkzame stof, gebruik en houdbaarheidswaarschuwingen.
 - **Dubbelingen** – welke middelen hetzelfde doen en in welke volgorde je ze opmaakt.
